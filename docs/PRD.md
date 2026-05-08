@@ -7,6 +7,13 @@
 
 ---
 
+## Confirmed Decisions
+- Citizen access is anonymous in Phase 1.
+- Operator access requires login for drivers, dispatchers, admins, and analysts.
+- Grafana remains a standalone operational tool and is not embedded in the portal.
+- VROOM Phase 1 optimizes on distance, fill level, and vehicle capacity only.
+- NGSI-LD is mandatory throughout the platform; no NGSIv2 interfaces are exposed.
+
 ## Overview
 
 The Smart Waste Management Portal is a data-driven system designed to optimize waste collection operations across A Coruña. By leveraging IoT sensors, real-time context management through FIWARE, and intelligent route optimization, the system will improve operational efficiency, reduce environmental impact, and enhance citizen engagement.
@@ -22,10 +29,10 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 
 ## User Stories
 
-### Citizen Personas
+### Citizen Personas (Anonymous)
 
 #### UC1: Citizen - Locate Nearby Container
-**As a** citizen,  
+**As an** anonymous citizen,
 **I want to** locate the nearest waste container on a map,  
 **So that** I can dispose of waste quickly and conveniently.
 
@@ -36,7 +43,7 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 - Real-time fill level is displayed
 
 #### UC2: Citizen - Report Container Issue
-**As a** citizen,  
+**As an** anonymous citizen,
 **I want to** report a full or damaged container,  
 **So that** municipal services can respond quickly.
 
@@ -47,7 +54,7 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 - Status tracking available
 
 #### UC3: Citizen - View Collection Schedule
-**As a** citizen,  
+**As an** anonymous citizen,
 **I want to** know when waste is collected in my area,  
 **So that** I can plan accordingly.
 
@@ -58,10 +65,10 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 
 ---
 
-### Waste Collection Service Personas
+### Operator Personas (Authenticated)
 
 #### UC4: Driver - Optimized Route
-**As a** waste collection driver,  
+**As an** authenticated driver,
 **I want to** receive an optimized route based on real-time container data,  
 **So that** I minimize drive time and fuel consumption.
 
@@ -73,7 +80,7 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 - Completion confirmation with timestamp
 
 #### UC5: Dispatcher - Monitor Fleet
-**As a** fleet dispatcher,  
+**As an** authenticated dispatcher,
 **I want to** monitor all collection vehicles in real-time,  
 **So that** I can respond to emergencies and track efficiency.
 
@@ -84,7 +91,7 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 - Historical trip analytics
 
 #### UC6: Maintenance - Predict Issues
-**As a** maintenance manager,  
+**As an** authenticated analyst or admin,
 **I want to** receive alerts when containers show anomalies (temperature, tampering, malfunction),  
 **So that** I can schedule maintenance proactively.
 
@@ -99,7 +106,7 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 ### Administrator & Data Analyst Personas
 
 #### UC7: Administrator - System Configuration
-**As a** system administrator,  
+**As an** authenticated administrator,
 **I want to** configure container types, zones, and operational parameters,  
 **So that** the system adapts to municipal policies.
 
@@ -110,7 +117,7 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 - User access control and permissions
 
 #### UC8: Data Analyst - Historical Reports
-**As a** data analyst,  
+**As an** authenticated analyst,
 **I want to** analyze historical waste generation patterns,  
 **So that** I can support strategic planning and forecasting.
 
@@ -173,41 +180,45 @@ The Smart Waste Management Portal is a data-driven system designed to optimize w
 - Map rendering: ≤ 500ms for 500+ containers
 - Route calculation: ≤ 30 seconds for 100+ stops
 
-### NFR2: Scalability
+### NFR2: Protocol Compliance
+- NGSI-LD is mandatory for all brokered and persisted entity interactions.
+- No NGSIv2 interfaces shall be exposed by the platform.
+
+### NFR3: Scalability
 - System shall handle ≥ 5,000 active containers
 - Support ≥ 100 simultaneous users
 - Container queries shall scale horizontally
 
-### NFR3: Availability
+### NFR4: Availability
 - System uptime: ≥ 99.5%
 - RTO (Recovery Time Objective): ≤ 1 hour
 - RPO (Recovery Point Objective): ≤ 15 minutes
 - Automated failover mechanisms
 
-### NFR4: Security
+### NFR5: Security
 - All data in transit shall use TLS 1.3+
 - Data at rest shall be encrypted (AES-256)
 - OWASP Top 10 compliance
 - Annual security audits
 
-### NFR5: Data Privacy (GDPR)
+### NFR6: Data Privacy (GDPR)
 - Personal data collection shall be minimized
 - Right to be forgotten implementation
 - Data retention policies shall be explicit
 - Privacy impact assessments for new features
 
-### NFR6: Interoperability
+### NFR7: Interoperability
 - NGSI-LD compliant (ETSI standard)
 - OpenAPI 3.0 specification for all REST endpoints
 - Support for standard IoT protocols (MQTT, CoAP, HTTP)
 
-### NFR7: Maintainability
+### NFR8: Maintainability
 - Code coverage: ≥ 80%
 - Automated testing (unit, integration, E2E)
 - CI/CD pipeline with automated deployments
 - Documentation-first development
 
-### NFR8: Sustainability
+### NFR9: Sustainability
 - Reduce collection vehicle travel by ≥ 15% (Year 1)
 - Carbon footprint tracking for routes
 - Integration with municipal sustainability goals

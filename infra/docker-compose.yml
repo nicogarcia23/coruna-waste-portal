@@ -1,0 +1,215 @@
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    networks:
+      - waste-net
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["mongod", "--bind_ip_all"]
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - waste-net
+
+  orion-ld:
+    image: fiware/orion-ld:1.6.0
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      ORIONLD_MONGO_HOST: ${ORIONLD_MONGO_HOST:-mongodb}
+      ORIONLD_MONGO_PORT: ${ORIONLD_MONGO_PORT:-27017}
+      ORIONLD_MONGO_DB: ${ORIONLD_MONGO_DB:-orion}
+      ORIONLD_MULTI_SERVICE: ${ORIONLD_MULTI_SERVICE:-TRUE}
+      ORIONLD_LOG_LEVEL: ${ORIONLD_LOG_LEVEL:-INFO}
+    ports:
+      - "1026:1026"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:1026/version >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - waste-net
+
+  iot-agent:
+    image: fiware/iotagent-ul:latest
+    restart: unless-stopped
+    depends_on:
+      - mqtt-broker
+      - orion-ld
+      - mongodb
+    environment:
+      IOTA_LOG_LEVEL: ${IOTA_LOG_LEVEL:-INFO}
+      IOTA_TIMESTAMP: ${IOTA_TIMESTAMP:-true}
+      IOTA_MQTT_HOST: ${IOTA_MQTT_HOST:-mqtt-broker}
+      IOTA_MQTT_PORT: ${IOTA_MQTT_PORT:-1883}
+      IOTA_CB_HOST: ${IOTA_CB_HOST:-orion-ld}
+      IOTA_CB_PORT: ${IOTA_CB_PORT:-1026}
+      IOTA_NORTH_PORT: ${IOTA_NORTH_PORT:-4041}
+      IOTA_HTTP_PORT: ${IOTA_HTTP_PORT:-7896}
+      IOTA_REGISTRY_TYPE: ${IOTA_REGISTRY_TYPE:-mongodb}
+      IOTA_MONGO_HOST: ${IOTA_MONGO_HOST:-mongodb}
+      IOTA_MONGO_PORT: ${IOTA_MONGO_PORT:-27017}
+      IOTA_MONGO_DB: ${IOTA_MONGO_DB:-iotagentul}
+      IOTA_MONGO_REPLICASET: ${IOTA_MONGO_REPLICASET:-}
+      IOTA_PROVIDER_URL: ${IOTA_PROVIDER_URL:-http://iot-agent:4041}
+    ports:
+      - "4061:4041"
+      - "7896:7896"
+    networks:
+      - waste-net
+
+  timescaledb:
+    image: timescale/timescaledb-ha:pg16-latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-waste}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-waste-dev-password}
+      POSTGRES_DB: ${POSTGRES_DB:-waste}
+      PGDATA: /home/postgres/pgdata/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb-data:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-waste} -d ${POSTGRES_DB:-waste}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - waste-net
+
+  quantumleap:
+    image: smartsdk/quantumleap:latest
+    restart: unless-stopped
+    depends_on:
+      - orion-ld
+      - timescaledb
+    environment:
+      CRATE_HOST: ${QUANTUMLEAP_DB_HOST:-timescaledb}
+      CRATE_PORT: ${QUANTUMLEAP_DB_PORT:-5432}
+      QL_DB_HOST: ${QUANTUMLEAP_DB_HOST:-timescaledb}
+      QL_DB_PORT: ${QUANTUMLEAP_DB_PORT:-5432}
+      QL_DB_NAME: ${QUANTUMLEAP_DB_NAME:-waste}
+      QL_DB_USER: ${QUANTUMLEAP_DB_USER:-waste}
+      QL_DB_PASSWORD: ${QUANTUMLEAP_DB_PASSWORD:-waste-dev-password}
+      ORIONLD_HOST: ${ORIONLD_HOST:-orion-ld}
+      ORIONLD_PORT: ${ORIONLD_PORT:-1026}
+    ports:
+      - "8668:8668"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8668/v2/version >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - waste-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - waste-net
+
+  vroom:
+    image: vroomvrp/vroom-express:latest
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      VROOM_SERVER: ${VROOM_SERVER:-http://localhost:3000}
+    networks:
+      - waste-net
+
+  backend-api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    profiles:
+      - app
+    depends_on:
+      orion-ld:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+      quantumleap:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      vroom:
+        condition: service_started
+    environment:
+      PORT: 8000
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      ORION_LD_URL: ${ORION_LD_URL:-http://orion-ld:1026}
+      TIMESCALEDB_URL: ${TIMESCALEDB_URL:-postgresql://${POSTGRES_USER:-waste}:${POSTGRES_PASSWORD:-waste-dev-password}@timescaledb:5432/${POSTGRES_DB:-waste}}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      VROOM_URL: ${VROOM_URL:-http://vroom:3000}
+      QUANTUMLEAP_URL: ${QUANTUMLEAP_URL:-http://quantumleap:8668}
+    ports:
+      - "8000:8000"
+    networks:
+      - waste-net
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    profiles:
+      - app
+    depends_on:
+      - backend-api
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    networks:
+      - waste-net
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_HTTP_PORT: 3000
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - waste-net
+
+volumes:
+  timescaledb-data:
+  grafana-data:
+  mosquitto-data:
+  mongodb-data:
+
+networks:
+  waste-net:
+    driver: bridge

@@ -11,6 +11,8 @@
 
 The Smart Waste Management Portal is built on a modern microservices architecture leveraging FIWARE components for context management. The system integrates real-time IoT data, implements intelligent route optimization, and provides comprehensive analytics to municipal waste management operations.
 
+Phase 1 targets a local Docker Compose deployment only. Kubernetes, Swarm, and cloud-native production orchestration remain out of scope until the runtime boundary is validated.
+
 ### Design Principles
 - **Scalability**: Horizontal scaling of services and data stores
 - **Resilience**: Fault tolerance and circuit breaker patterns
@@ -84,7 +86,7 @@ The Smart Waste Management Portal is built on a modern microservices architectur
 - **Retention Policy**: 24 months minimum
 - **Query Capability**: Historical aggregations, trend analysis
 
-**Deployment**: Docker containers, Helm charts for Kubernetes
+**Deployment**: Docker containers managed through local Docker Compose in Phase 1
 
 ---
 
@@ -124,104 +126,112 @@ The Smart Waste Management Portal is built on a modern microservices architectur
 ## Component Architecture Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      CITIZEN / DRIVER / ADMIN                    │
-│                    (Web Browser + Mobile)                         │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-    ┌───▼────┐       ┌────▼────┐       ┌──▼───┐
-    │Web App │       │Mobile   │       │Admin │
-    │React   │       │PWA/App  │       │Portal│
-    │Leaflet │       │         │       │      │
-    └───┬────┘       └────┬────┘       └──┬───┘
-        │                 │               │
-        └─────────────────┼───────────────┘
-                          │
-        ┌─────────────────▼──────────────────┐
-        │      API GATEWAY / Kong             │
-        │    (Auth, Rate Limit, Routing)      │
-        └─────────────────┬──────────────────┘
-                          │
-        ┌─────────────────┴──────────────────┐
-        │                                     │
-    ┌───▼──────────────┐            ┌────────▼─────┐
-    │  Container API   │            │  Route       │
-    │  & Management    │            │  Optimization│
-    │  (FastAPI)       │            │  Service     │
-    └───┬──────────────┘            └────────┬─────┘
-        │                                     │
-        └──────────────────┬──────────────────┘
-                           │
-        ┌──────────────────▼──────────────────┐
-        │   FIWARE Context Management         │
-        │                                     │
-        │  ┌─────────────────────────────┐   │
-        │  │ Orion Context Broker        │   │
-        │  │ (NGSI-LD Endpoint)          │   │
-        │  └────────┬────────────────────┘   │
-        │           │                        │
-        │  ┌────────▼──────┐   ┌──────────┐ │
-        │  │ IoT Agent     │   │QL (Time) │ │
-        │  │ (MQTT/CoAP)   │   │ Series   │ │
-        │  └────────┬──────┘   └──────────┘ │
-        │           │                        │
-        └───────────┼────────────────────────┘
-                    │
-        ┌───────────▼─────────────┐
-        │   IoT Devices / Sensors │
-        │   - Fill Level          │
-        │   - Temperature         │
-        │   - Tamper Detection    │
-        └─────────────────────────┘
-        
-        [Parallel Data Flow]
-        
-        ┌───────────────────────────────────┐
-        │  Data Layer                        │
-        │                                    │
-        │  ┌──────────────────────────────┐ │
-        │  │ PostgreSQL + PostGIS         │ │
-        │  │ - Entities (JSONB)           │ │
-        │  │ - Geospatial Queries         │ │
-        │  │ - Configuration              │ │
-        │  └──────────────────────────────┘ │
-        │                                    │
-        │  ┌──────────────────────────────┐ │
-        │  │ TimescaleDB                  │ │
-        │  │ - Historical Observations    │ │
-        │  │ - 24-month Retention         │ │
-        │  └──────────────────────────────┘ │
-        │                                    │
-        │  ┌──────────────────────────────┐ │
-        │  │ Redis Cache                  │ │
-        │  │ - Session Store              │ │
-        │  │ - Query Cache                │ │
-        │  └──────────────────────────────┘ │
-        │                                    │
-        │  ┌──────────────────────────────┐ │
-        │  │ Elasticsearch                │ │
-        │  │ - Logs & Metrics             │ │
-        │  │ - Full-text Search           │ │
-        │  └──────────────────────────────┘ │
-        └────────────────────────────────────┘
-        
-        ┌──────────────────────────────────────┐
-        │  Analytics & Visualization           │
-        │                                      │
-        │  ┌──────────────────────────────┐   │
-        │  │ Grafana                      │   │
-        │  │ - Real-time Dashboards       │   │
-        │  │ - Custom Reports             │   │
-        │  └──────────────────────────────┘   │
-        │                                      │
-        │  ┌──────────────────────────────┐   │
-        │  │ Kibana (optional)            │   │
-        │  │ - Log Analysis               │   │
-        │  └──────────────────────────────┘   │
-        └──────────────────────────────────────┘
+┌──────────────────────────────┐
+│   Citizen / Operator Users   │
+│   Browser + PWA + Desktop    │
+└──────────────┬───────────────┘
+               │
+     ┌─────────▼─────────┐
+     │   frontend        │
+     │   3000/tcp        │
+     └─────────┬─────────┘
+               │
+     ┌─────────▼─────────┐
+     │   backend-api     │
+     │   8000/tcp        │
+     └──────┬─────┬──────┘
+            │     │
+            │     └──────────────────────┐
+            │                            │
+┌───────────▼───────────┐      ┌─────────▼─────────┐
+│   Orion-LD            │      │   TimescaleDB     │
+│   1026/tcp            │      │   5432/tcp        │
+└───────────┬───────────┘      └─────────┬─────────┘
+            │                            │
+┌───────────▼───────────┐      ┌─────────▼─────────┐
+│   QuantumLeap         │      │   Grafana         │
+│   8668/tcp            │      │   3001:3000       │
+└───────────┬───────────┘      └───────────────────┘
+            │
+┌───────────▼───────────┐      ┌───────────────────┐
+│   IoT Agent UL        │      │   Redis           │
+│   4061 / 7896         │      │   6379/tcp        │
+└───────────┬───────────┘      └───────────────────┘
+            │
+┌───────────▼───────────┐      ┌───────────────────┐
+│   MQTT Broker         │      │   VROOM           │
+│   1883/tcp            │      │   3002:3000       │
+└───────────┬───────────┘      └───────────────────┘
+            │
+┌───────────▼───────────┐
+│   IoT Sensors         │
+│   fill / temp / alert │
+└───────────────────────┘
+
+Support service not shown in the main path:
+- mongodb: backing store for Orion-LD and IoT Agent UL metadata
 ```
+
+## Storage Decision: TimescaleDB vs CrateDB
+
+| Criterion | TimescaleDB | CrateDB | Phase 1 Decision |
+|---|---|---|---|
+| Latency | Strong for PostgreSQL-style time-series workloads, especially when paired with SQL and indexes | Strong distributed ingestion and search-style analytics | TimescaleDB as working default |
+| SQL compatibility | Native PostgreSQL SQL, extensions, and familiar tooling | SQL-like, but with its own operational patterns | TimescaleDB |
+| Operational complexity | Low to moderate in a single-node Compose stack | Higher if a distributed cluster is required | TimescaleDB |
+| FIWARE ecosystem support | Fits the current Compose and backend direction; easier to connect to Grafana and Python analytics | Historically common in QuantumLeap recipes | TimescaleDB for now, CrateDB kept as fallback |
+| Scaling model | Vertical scaling plus hypertables and read replicas | Distributed cluster scaling | TimescaleDB for Phase 1; revisit if shard-heavy workloads appear |
+
+The working default for Compose is TimescaleDB. CrateDB remains documented as the historical QuantumLeap-compatible option, but the implementation should continue on the TimescaleDB path unless validation proves that a later swap is necessary.
+
+## Local Compose Topology
+
+| Service | Port(s) | Named Volume(s) | Depends On |
+|---|---|---|---|
+| mqtt-broker | 1883 | mosquitto-data | - |
+| mongodb | internal | mongodb-data | - |
+| orion-ld | 1026 | - | mongodb |
+| iot-agent | 4061, 7896 | - | mqtt-broker, orion-ld, mongodb |
+| timescaledb | 5432 | timescaledb-data | - |
+| quantumleap | 8668 | - | orion-ld, timescaledb |
+| redis | 6379 | - | - |
+| vroom | 3002 | - | - |
+| backend-api | 8000 | - | orion-ld, timescaledb, quantumleap, redis, vroom |
+| frontend | 3000 | - | backend-api |
+| grafana | 3001 | grafana-data | - |
+
+All services share the `waste-net` bridge network in Phase 1.
+
+## Data Flow
+
+### Write Path
+```
+IoT sensor -> MQTT broker -> IoT Agent -> Orion-LD -> QuantumLeap -> TimescaleDB
+```
+
+1. The container sensor publishes a reading over MQTT.
+2. Mosquitto receives the message on `1883`.
+3. IoT Agent UL translates the payload into NGSI-LD-compatible context updates.
+4. Orion-LD stores the current entity state.
+5. Orion-LD subscriptions forward temporal updates to QuantumLeap.
+6. QuantumLeap persists time-series history into TimescaleDB.
+
+### Read Path
+```
+frontend -> backend-api -> Orion-LD / TimescaleDB
+```
+
+1. The frontend requests nearby containers, operational state, or route inputs from the backend.
+2. The backend reads live context from Orion-LD.
+3. The backend queries TimescaleDB for trends, fill history, and route analytics.
+4. The backend returns a normalized response to the frontend.
+
+### Visualization Path
+```
+Grafana -> TimescaleDB
+```
+
+Grafana remains a separate operational tool and reads directly from the historical database for dashboards and alerts.
 
 ---
 
