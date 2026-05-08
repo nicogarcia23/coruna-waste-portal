@@ -20,6 +20,30 @@ All entities in the Smart Waste Management Portal follow the NGSI-LD specificati
 
 ---
 
+## Context Strategy
+
+Use a layered @context stack for every entity:
+
+1. ETSI NGSI-LD core context.
+2. Smart Data Models base context.
+3. Entity-specific Smart Data Models context.
+4. Local extension namespace for project-only fields.
+
+Recommended local namespace:
+
+```json
+{
+  "@context": [
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "https://w3id.org/smartdatamodels/context.jsonld",
+    "https://smartdatamodels.org/extra/ngsi-ld_waste-container.jsonld",
+    {
+      "coruña-waste": "urn:ngsi-ld:coruña-waste:"
+    }
+  ]
+}
+```
+
 ## NGSI-LD Entity Models
 
 ### 1. WasteContainer
@@ -31,7 +55,14 @@ Represents a physical waste collection point.
 {
   "id": "urn:ngsi-ld:WasteContainer:coruna-001",
   "type": "WasteContainer",
-  "@context": ["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"],
+  "@context": [
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "https://w3id.org/smartdatamodels/context.jsonld",
+    "https://smartdatamodels.org/extra/ngsi-ld_waste-container.jsonld",
+    {
+      "coruña-waste": "urn:ngsi-ld:coruña-waste:"
+    }
+  ],
   
   "name": {
     "type": "Property",
@@ -99,25 +130,23 @@ Represents a physical waste collection point.
 }
 ```
 
-#### Static Attributes
-| Attribute | Type | Description | Multiplicity |
-|-----------|------|-------------|--------------|
-| id | URI | Unique identifier | 1 |
-| type | String | "WasteContainer" | 1 |
-| name | Property | Container display name | 1 |
-| description | Property | Descriptive text | 0..1 |
-| containerType | Property | Waste type | 1 |
-| location | GeoProperty | Geographic coordinates | 1 |
-| capacity | Property | Container capacity (liters) | 1 |
-| isleId | Relationship | Parent isle reference | 0..1 |
-| modelId | Relationship | Container model reference | 1 |
-| installationDate | Property | ISO8601 date | 1 |
-| status | Property | Operational status | 1 |
-| municipalityCode | Property | Municipal code (DANE) | 1 |
-| hasOperator | Relationship | Operator organization | 0..1 |
-
-#### Dynamic Attributes
-See `WasteObserved` model for real-time measurements.
+#### Attribute Table
+| Attribute | NGSI-LD Type | Static/Dynamic | Notes |
+|-----------|--------------|----------------|-------|
+| id | Identifier | Static | URN for the physical container |
+| type | Type | Static | Must be `WasteContainer` |
+| name | Property | Static | Human-readable name |
+| description | Property | Static | Optional descriptive text |
+| containerType | Property | Static | organic, glass, paper, plastic, general waste, etc. |
+| location | GeoProperty | Static | Point geometry for the container position |
+| capacity | Property | Static | Container capacity in liters |
+| isleId | Relationship | Static | Link to parent WasteContainerIsle |
+| modelId | Relationship | Static | Link to WasteContainerModel |
+| installationDate | Property | Static | Asset lifecycle timestamp |
+| status | Property | Dynamic | operational, maintenance, out_of_service |
+| nextCollection | Property | Dynamic | Operational schedule target |
+| municipalityCode | Property | Static | Municipal code for A Coruña |
+| hasOperator | Relationship | Static | Operator/organization relation |
 
 ---
 
@@ -130,7 +159,14 @@ Real-time observations from waste containers.
 {
   "id": "urn:ngsi-ld:WasteObserved:coruna-001-2026-05-08T15:30:00Z",
   "type": "WasteObserved",
-  "@context": ["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"],
+  "@context": [
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "https://w3id.org/smartdatamodels/context.jsonld",
+    "https://smartdatamodels.org/extra/ngsi-ld_waste-observed.jsonld",
+    {
+      "coruña-waste": "urn:ngsi-ld:coruña-waste:"
+    }
+  ],
   
   "refContainer": {
     "type": "Relationship",
@@ -196,17 +232,22 @@ Real-time observations from waste containers.
 }
 ```
 
-#### Dynamic Attributes (Real-Time)
-| Attribute | Type | Unit | Range | Update Frequency |
-|-----------|------|------|-------|------------------|
-| fillLevel | Float | % | 0-1 | 5 min |
-| temperature | Float | °C | -10 to 60 | 5 min |
-| methaneLevel | Float | ppm | 0-1000 | 15 min |
-| tamperAlert | Boolean | - | true/false | 1 min |
-| malfunctionAlert | Boolean | - | true/false | 1 min |
-| moistureLevel | Float | % | 0-1 | 15 min |
-| lastEmptyingDate | DateTime | - | - | On collection |
-| location | Point | - | - | 1 hour |
+#### Attribute Table
+| Attribute | NGSI-LD Type | Static/Dynamic | Notes |
+|-----------|--------------|----------------|-------|
+| id | Identifier | Static | Observation URN |
+| type | Type | Static | Must be `WasteObserved` |
+| refContainer | Relationship | Static | Link to the source container |
+| dateObserved | Property | Dynamic | Timestamp of the observation |
+| fillLevel | Property | Dynamic | 0.0 to 1.0 percentage fraction |
+| temperature | Property | Dynamic | Environmental temperature |
+| methaneLevel | Property | Dynamic | Optional gas sensor reading |
+| tamperAlert | Property | Dynamic | Boolean tamper indicator |
+| malfunctionAlert | Property | Dynamic | Boolean malfunction indicator |
+| moistureLevel | Property | Dynamic | Environmental moisture reading |
+| lastEmptyingDate | Property | Dynamic | Updated when the container is serviced |
+| location | GeoProperty | Dynamic | Usually copied from the container for convenience |
+| source | Property | Static | Ingestion source or adapter name |
 
 ---
 
@@ -219,7 +260,14 @@ Grouping of waste containers in a geographic zone.
 {
   "id": "urn:ngsi-ld:WasteContainerIsle:coruna-isle-01",
   "type": "WasteContainerIsle",
-  "@context": ["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"],
+  "@context": [
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "https://w3id.org/smartdatamodels/context.jsonld",
+    "https://smartdatamodels.org/extra/ngsi-ld_waste-container-isle.jsonld",
+    {
+      "coruña-waste": "urn:ngsi-ld:coruña-waste:"
+    }
+  ],
   
   "name": {
     "type": "Property",
@@ -285,15 +333,20 @@ Grouping of waste containers in a geographic zone.
 }
 ```
 
-#### Attributes
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| name | Property | Isle identifier |
-| location | GeoProperty | Geographic boundary (Polygon) |
-| hasContainers | Relationship | List of containers in isle |
-| collectionSchedule | Property | Weekly collection times |
-| areaServed | Property | District or area name |
-| address | Property | Street address |
+#### Attribute Table
+| Attribute | NGSI-LD Type | Static/Dynamic | Notes |
+|-----------|--------------|----------------|-------|
+| id | Identifier | Static | URN for the isle |
+| type | Type | Static | Must be `WasteContainerIsle` |
+| name | Property | Static | Human-readable zone name |
+| description | Property | Static | Optional descriptive text |
+| location | GeoProperty | Static | Polygon boundary for the zone |
+| hasContainers | Relationship | Mostly static | Membership changes only when containers move |
+| collectionSchedule | Property | Mostly static | Weekly collection definition |
+| areaServed | Property | Static | District or neighborhood name |
+| address | Property | Static | Display address or centroid label |
+| municipalityCode | Property | Static | Municipal administrative code |
+| status | Property | Dynamic | operational, maintenance, inactive |
 
 ---
 
@@ -306,7 +359,14 @@ Technical specifications and capabilities of container types.
 {
   "id": "urn:ngsi-ld:WasteContainerModel:model-wheelbin-240l",
   "type": "WasteContainerModel",
-  "@context": ["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"],
+  "@context": [
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "https://w3id.org/smartdatamodels/context.jsonld",
+    "https://smartdatamodels.org/extra/ngsi-ld_waste-container-model.jsonld",
+    {
+      "coruña-waste": "urn:ngsi-ld:coruña-waste:"
+    }
+  ],
   
   "name": {
     "type": "Property",
@@ -377,23 +437,28 @@ Technical specifications and capabilities of container types.
 }
 ```
 
-#### Attributes
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| name | Property | Model name |
-| manufacturer | Property | Manufacturer name |
-| capacity | Property | Volume in liters |
-| weight | Property | Weight in kg |
-| dimensions | Property | Physical dimensions |
-| sensors | Property | List of available sensors |
-| communicationProtocol | Property | IoT protocol used |
-| batteryLife | Property | Expected battery duration |
+#### Attribute Table
+| Attribute | NGSI-LD Type | Static/Dynamic | Notes |
+|-----------|--------------|----------------|-------|
+| id | Identifier | Static | URN for the model |
+| type | Type | Static | Must be `WasteContainerModel` |
+| name | Property | Static | Display name for the catalog entry |
+| manufacturer | Property | Static | Vendor or brand name |
+| modelName | Property | Static | Technical catalog name |
+| containerType | Property | Static | Physical family or waste category |
+| capacity | Property | Static | Capacity in liters |
+| weight | Property | Static | Container weight in kg |
+| dimensions | Property | Static | Physical dimensions object |
+| sensors | Property | Static | Supported sensor list |
+| communicationProtocol | Property | Static | mqtt, coap, or http |
+| batteryLife | Property | Static | Expected battery duration in months |
+| warranty | Property | Static | Warranty duration in months |
 
 ---
 
 ## Cross-Sector Smart Data Models References
 
-The project aligns with the following FIWARE Smart Data Models:
+The project aligns with the following FIWARE Smart Data Models and adjacent semantic vocabularies.
 
 ### StandardizedDataModels
 | Model | Reference | Usage |
@@ -403,28 +468,17 @@ The project aligns with the following FIWARE Smart Data Models:
 | **WasteContainerModel** | [Smart Data Models](https://smartdatamodels.org/extra/ngsi-ld_waste-container-model.jsonld) | Technical specs |
 | **WasteObserved** | [Smart Data Models](https://smartdatamodels.org/extra/ngsi-ld_waste-observed.jsonld) | Real-time data |
 
-### Related Domains
-- **Civic** → Address, Organization
-- **Device** → Sensor capabilities, Battery status
-- **PointOfInterest** → Location context
-- **Organization** → Service providers, Operators
+### Cross-Sector Alignment
+
+- schema.org for name, description, address, areaServed, and manufacturer fields.
+- SAREF4ENVI and SOSA for temperature, moisture, methane, and sensor-observation semantics.
+- Civic and administrative vocabularies for address and municipal references.
+- Organization semantics for operators and service providers.
+- Point-of-interest semantics for spatial container and isle location.
 
 ---
 
 ## Static vs Dynamic Attributes
-
-### Static Attributes (Rarely Change)
-- Container ID, type, capacity
-- Physical location, dimensions
-- Installation date
-- Operator information
-
-### Dynamic Attributes (Real-Time)
-- Fill level (updated every 5 minutes)
-- Temperature, humidity
-- Tamper/malfunction alerts
-- Last collection timestamp
-- Container health status
 
 ### Update Strategy
 ```
@@ -456,15 +510,16 @@ The project aligns with the following FIWARE Smart Data Models:
 
 ## JSON-LD Context
 
-All entities use the following @context:
+All entities use the layered @context strategy described above. A concrete entity payload may look like this:
 
 ```json
 {
   "@context": [
     "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
     "https://w3id.org/smartdatamodels/context.jsonld",
+    "https://smartdatamodels.org/extra/ngsi-ld_waste-container.jsonld",
     {
-      "wasteManagement": "https://example.com/smartcity/waste/ontology#"
+      "coruña-waste": "urn:ngsi-ld:coruña-waste:"
     }
   ]
 }
