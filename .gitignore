@@ -1,0 +1,187 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+.npm
+.eslintcache
+dist/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# Database & Data
+*.db
+*.sqlite
+*.sqlite3
+*.log
+data/logs/
+data/temp/
+data/*.csv
+
+# OS
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# FIWARE
+orion_data/
+mongodb/
+postgres_data/
+timescale_data/
+redis_data/
+elasticsearch_data/
+
+# Credentials & Secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+*.p12
+kubeconfig
+config.yml
+
+# Build artifacts
+*.o
+*.a
+*.lib
+*.so
+*.exe
+*.bin
+
+# IDE temp files
+.vscode/settings.json
+.vscode/launch.json
+.idea/workspace.xml
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Frontend
+dist/
+build/
+.parcel-cache/
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# OS-specific
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Misc
+*.bak
+*.backup
+.DS_Store
+.AppleDouble
+.LSOverride
+*.orig
+
+# Dependencies lock files (commented out for monorepo flexibility)
+# package-lock.json
+# yarn.lock
+
+# Generated files
+generated/
+*.proto.go
+
+# Test reports
+test-results.xml
+test-report.html
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+
+# Development secrets
+.credentials
+.aws/
+.gcp/
