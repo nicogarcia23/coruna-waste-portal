@@ -1,12 +1,14 @@
 COMPOSE = docker compose --env-file infra/.env -f infra/docker-compose.yml
 
-.PHONY: up up-all down logs ps reset backend-local frontend-local
+.PHONY: up up-all all down logs ps reset backend-local frontend-local
 
 up:
 	$(COMPOSE) up -d
 
 up-all:
 	$(COMPOSE) --profile app up -d
+
+all: up-all
 
 down:
 	$(COMPOSE) down
