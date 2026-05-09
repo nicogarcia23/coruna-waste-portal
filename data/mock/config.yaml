@@ -1,0 +1,85 @@
+seeds:
+  dev:
+    total_containers: 50
+    days: 7
+    interval_minutes: 60
+    isles_per_district: 1
+  mvp:
+    total_containers: 250
+    days: 30
+    interval_minutes: 15
+    target_containers_per_isle: 25
+  city:
+    total_containers: 1000
+    days: 90
+    interval_minutes: 15
+    target_containers_per_isle: 20
+
+waste_type_mix:
+  organic: 0.275
+  paper: 0.20
+  glass: 0.15
+  plastic: 0.175
+  general: 0.20
+
+district_weights:
+  Cidade Vella/Centro: 0.16
+  Ensanche-Juan Flórez: 0.14
+  Monte Alto: 0.08
+  Riazor-Orzán: 0.10
+  Os Mallos-Sagrada Familia: 0.08
+  Cuatro Caminos: 0.08
+  Os Castros: 0.10
+  Eirís: 0.06
+  Os Rosales: 0.06
+  Matogrande/Palavea: 0.08
+  A Grela: 0.06
+
+models:
+  - id: model-street-240l
+    capacity: 240
+    types: [organic, general]
+    weight: 0.30
+  - id: model-communal-800l
+    capacity: 800
+    types: [paper, glass]
+    weight: 0.25
+  - id: model-street-1100l
+    capacity: 1100
+    types: [general, organic]
+    weight: 0.15
+  - id: model-underground
+    capacity: 3000
+    types: [glass, paper]
+    weight: 0.10
+  - id: model-twochamber
+    capacity: 1100
+    types: [plastic, paper]
+    weight: 0.10
+  - id: model-sensor-basic
+    capacity: 500
+    types: [organic, plastic]
+    weight: 0.10
+
+fill_behavior:
+  emptying_frequency_per_week:
+    Cidade Vella/Centro: 5
+    Ensanche-Juan Flórez: 4
+    Monte Alto: 3
+    Riazor-Orzán: 4
+    Os Mallos-Sagrada Familia: 3
+    Cuatro Caminos: 3
+    Os Castros: 3
+    Eirís: 2
+    Os Rosales: 2
+    Matogrande/Palavea: 2
+    A Grela: 2
+  noise_std: 0.03
+  overflow_probability: 0.008
+  fault_probability: 0.005
+
+ingestion:
+  concurrency: 20
+  retry_attempts: 3
+  retry_backoff_base: 2
+  throttle_rps: 50

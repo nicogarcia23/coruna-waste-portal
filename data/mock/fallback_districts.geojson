@@ -1,0 +1,16 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","properties":{"name":"Cidade Vella/Centro"},"geometry":{"type":"Polygon","coordinates":[[[-8.405,43.395],[-8.395,43.395],[-8.395,43.385],[-8.405,43.385],[-8.405,43.395]]] }},
+    {"type":"Feature","properties":{"name":"Ensanche-Juan Flórez"},"geometry":{"type":"Polygon","coordinates":[[[-8.395,43.395],[-8.375,43.395],[-8.375,43.375],[-8.395,43.375],[-8.395,43.395]]] }},
+    {"type":"Feature","properties":{"name":"Monte Alto"},"geometry":{"type":"Polygon","coordinates":[[[-8.405,43.375],[-8.395,43.375],[-8.395,43.365],[-8.405,43.365],[-8.405,43.375]]] }},
+    {"type":"Feature","properties":{"name":"Riazor-Orzán"},"geometry":{"type":"Polygon","coordinates":[[[-8.395,43.375],[-8.375,43.375],[-8.375,43.365],[-8.395,43.365],[-8.395,43.375]]] }},
+    {"type":"Feature","properties":{"name":"Os Mallos-Sagrada Familia"},"geometry":{"type":"Polygon","coordinates":[[[-8.385,43.365],[-8.365,43.365],[-8.365,43.355],[-8.385,43.355],[-8.385,43.365]]] }},
+    {"type":"Feature","properties":{"name":"Cuatro Caminos"},"geometry":{"type":"Polygon","coordinates":[[[-8.375,43.355],[-8.355,43.355],[-8.355,43.345],[-8.375,43.345],[-8.375,43.355]]] }},
+    {"type":"Feature","properties":{"name":"Os Castros"},"geometry":{"type":"Polygon","coordinates":[[[-8.385,43.385],[-8.365,43.385],[-8.365,43.375],[-8.385,43.375],[-8.385,43.385]]] }},
+    {"type":"Feature","properties":{"name":"Eirís"},"geometry":{"type":"Polygon","coordinates":[[[-8.355,43.385],[-8.335,43.385],[-8.335,43.375],[-8.355,43.375],[-8.355,43.385]]] }},
+    {"type":"Feature","properties":{"name":"Os Rosales"},"geometry":{"type":"Polygon","coordinates":[[[-8.355,43.375],[-8.335,43.375],[-8.335,43.365],[-8.355,43.365],[-8.355,43.375]]] }},
+    {"type":"Feature","properties":{"name":"Matogrande/Palavea"},"geometry":{"type":"Polygon","coordinates":[[[-8.345,43.365],[-8.325,43.365],[-8.325,43.355],[-8.345,43.355],[-8.345,43.365]]] }},
+    {"type":"Feature","properties":{"name":"A Grela"},"geometry":{"type":"Polygon","coordinates":[[[-8.335,43.355],[-8.315,43.355],[-8.315,43.345],[-8.335,43.345],[-8.335,43.355]]] }}
+  ]
+}
