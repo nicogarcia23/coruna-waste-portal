@@ -1,0 +1,13 @@
+{
+  "@context": ["../context/context.jsonld"],
+  "@type": "https://smartdatamodels.org/SmartDataModels/WasteObserved",
+  "description": "NGSI-LD semantic description for WasteObserved (telemetry/observations)",
+  "properties": {
+    "refContainer": { "@type": "Relationship", "description": "Reference to measured container" },
+    "fillLevel": { "@type": "Property", "description": "Measured fill level percentage" },
+    "temperature": { "@type": "Property", "description": "Temperature reading (C)" },
+    "battery": { "@type": "Property", "description": "Battery level percentage" },
+    "moisture": { "@type": "Property", "description": "Moisture reading (if available)" },
+    "dateObserved": { "@type": "Property", "description": "ISO8601 timestamp of observation" }
+  }
+}

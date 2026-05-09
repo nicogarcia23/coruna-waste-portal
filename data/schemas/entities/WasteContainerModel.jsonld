@@ -1,0 +1,12 @@
+{
+  "@context": ["../context/context.jsonld"],
+  "@type": "https://smartdatamodels.org/SmartDataModels/WasteContainerModel",
+  "description": "NGSI-LD semantic description for WasteContainerModel",
+  "properties": {
+    "manufacturer": { "@type": "Property" },
+    "modelNumber": { "@type": "Property" },
+    "capacity": { "@type": "Property" },
+    "sensorSpec": { "@type": "Property", "description": "Optional sensor specification (e.g., measurement types)" },
+    "communicationProtocol": { "@type": "Property", "description": "mqtt|http" }
+  }
+}

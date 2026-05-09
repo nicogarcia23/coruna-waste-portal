@@ -1,0 +1,21 @@
+{
+  "@context": ["../context/context.jsonld"],
+  "@type": "https://smartdatamodels.org/SmartDataModels/WasteContainer",
+  "description": "NGSI-LD semantic description for WasteContainer entity",
+  "properties": {
+    "name": {
+      "@type": "Property",
+      "description": "Human readable name of the container"
+    },
+    "description": { "@type": "Property" },
+    "containerType": { "@type": "Property", "description": "organic|paper|glass|plastic|general|bulky" },
+    "capacity": { "@type": "Property", "description": "Capacity in liters" },
+    "modelId": { "@type": "Relationship", "description": "Reference to WasteContainerModel entity" },
+    "isleId": { "@type": "Relationship", "description": "Reference to WasteContainerIsle" },
+    "location": { "@type": "GeoProperty", "description": "GeoJSON Point location (lon,lat)" },
+    "fillLevel": { "@type": "Property", "description": "Current fill level percentage (dynamic)" },
+    "status": { "@type": "Property", "description": "Operational status (dynamic)" },
+    "lastSeen": { "@type": "Property", "description": "Last telemetry timestamp" },
+    "communicationProtocol": { "@type": "Property", "description": "mqtt|http" }
+  }
+}

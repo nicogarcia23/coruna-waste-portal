@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:WasteObserved:coruna-OBS-20260508-0001",
+  "type": "WasteObserved",
+  "@context": ["../context/context.jsonld"],
+  "refContainer": { "type": "Relationship", "object": "urn:ngsi-ld:WasteContainer:coruna-CT-0001" },
+  "fillLevel": { "type": "Property", "value": 72.5 },
+  "temperature": { "type": "Property", "value": 18.3 },
+  "battery": { "type": "Property", "value": 87 },
+  "dateObserved": { "type": "Property", "value": "2026-05-08T10:00:00Z" }
+}

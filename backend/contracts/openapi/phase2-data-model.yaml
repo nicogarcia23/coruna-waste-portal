@@ -1,0 +1,246 @@
+openapi: 3.1.0
+info:
+  title: Coruña Waste Portal API
+  version: 0.2.0
+  description: API contracts for Phase 2 (schemas + entity proxies)
+tags:
+  - name: citizen
+    description: Public citizen endpoints
+  - name: operator
+    description: Operator endpoints (requires auth)
+  - name: admin
+    description: Administrative endpoints (requires auth)
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    NearbyContainer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        containerType:
+          type: string
+        fillLevel:
+          type: number
+        status:
+          type: string
+        distance:
+          type: number
+        location:
+          type: object
+      example:
+        id: urn:ngsi-ld:WasteContainer:coruna-CT-0001
+        name: Contenedor_Praza_Xeneral_Franco_01
+        containerType: organic
+        fillLevel: 72.5
+        status: needs_collection
+        distance: 120.4
+    ContainerStatus:
+      type: object
+      properties:
+        id: { type: string }
+        fillLevel: { type: number }
+        status: { type: string }
+        lastSeen: { type: string, format: date-time }
+        nextCollection: { type: string, format: date-time }
+    ContainerOverview:
+      type: object
+      properties:
+        totalContainers: { type: integer }
+        byStatus: { type: object }
+        avgFillLevel: { type: number }
+    AggregateResult:
+      type: object
+      properties:
+        group: { type: string }
+        metric: { type: number }
+        periodStart: { type: string }
+        periodEnd: { type: string }
+    HistoryRecord:
+      type: object
+      properties:
+        timestamp: { type: string }
+        fillLevel: { type: number }
+
+security: []
+paths:
+  /api/v1/containers/nearby:
+    get:
+      tags: [citizen]
+      summary: Find nearby containers
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number }
+        - name: lon
+          in: query
+          required: true
+          schema: { type: number }
+        - name: radius
+          in: query
+          schema: { type: integer, default: 500 }
+        - name: wasteType
+          in: query
+          schema: { type: string, enum: [organic,paper,glass,plastic,general] }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: List of nearby containers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NearbyContainer' }
+
+  /api/v1/containers/{id}/status:
+    get:
+      tags: [citizen]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Container status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContainerStatus' }
+
+  /api/v1/operators/containers/overview:
+    get:
+      tags: [operator]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: isleId
+          in: query
+          schema: { type: string }
+        - name: wasteType
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Overview
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContainerOverview' }
+
+  /api/v1/operators/containers/aggregates:
+    get:
+      tags: [operator]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: start
+          in: query
+          schema: { type: string, format: date-time }
+        - name: end
+          in: query
+          schema: { type: string, format: date-time }
+        - name: groupBy
+          in: query
+          schema: { type: string, enum: [isle,model] }
+        - name: metric
+          in: query
+          schema: { type: string, enum: [avg,max,p95] }
+        - name: granularity
+          in: query
+          schema: { type: string, enum: ["1h","6h","1d"] }
+      responses:
+        '200':
+          description: Aggregates
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AggregateResult' }
+
+  /api/v1/operators/containers/{id}/history:
+    get:
+      tags: [operator]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: start
+          in: query
+          schema: { type: string, format: date-time }
+        - name: end
+          in: query
+          schema: { type: string, format: date-time }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: History
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/HistoryRecord' }
+                  total: { type: integer }
+
+  /api/v1/entities:
+    post:
+      tags: [admin]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/ld+json:
+            schema: { type: object }
+      responses:
+        '201': { description: Created }
+    get:
+      tags: [admin]
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200': { description: List entities }
+
+  /api/v1/entities/{id}:
+    get:
+      tags: [admin]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Entity }
+    patch:
+      tags: [admin]
+      security: [{ BearerAuth: [] }]
+      responses: { '204': { description: Updated } }
+    delete:
+      tags: [admin]
+      security: [{ BearerAuth: [] }]
+      responses: { '204': { description: Deleted } }
+
+  /api/v1/hooks/orion:
+    post:
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: OK }

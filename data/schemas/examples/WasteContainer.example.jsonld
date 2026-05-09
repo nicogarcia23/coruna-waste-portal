@@ -1,0 +1,16 @@
+{
+  "id": "urn:ngsi-ld:WasteContainer:coruna-CT-0001",
+  "type": "WasteContainer",
+  "@context": ["../context/context.jsonld"],
+  "name": { "type": "Property", "value": "Contenedor_Praza_Xeneral_Franco_01" },
+  "description": { "type": "Property", "value": "Contenedor orgánico - Cidade Vella" },
+  "containerType": { "type": "Property", "value": "organic" },
+  "capacity": { "type": "Property", "value": 240, "unitCode": "LTR" },
+  "modelId": { "type": "Relationship", "object": "urn:ngsi-ld:WasteContainerModel:icr-2020-240L" },
+  "isleId": { "type": "Relationship", "object": "urn:ngsi-ld:WasteContainerIsle:coruna-ISLE-01" },
+  "location": { "type": "GeoProperty", "value": { "type": "Point", "coordinates": [-8.3879, 43.3734] } },
+  "fillLevel": { "type": "Property", "value": 72.5 },
+  "status": { "type": "Property", "value": "needs_collection" },
+  "lastSeen": { "type": "Property", "value": "2026-05-08T09:58:00Z" },
+  "communicationProtocol": { "type": "Property", "value": "mqtt" }
+}

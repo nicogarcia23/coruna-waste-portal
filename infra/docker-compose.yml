@@ -48,6 +48,20 @@ services:
       - mqtt-broker
       - orion-ld
       - mongodb
+
+  orion-subscriber:
+    image: curlimages/curl:latest
+    depends_on:
+      orion-ld:
+        condition: service_healthy
+      quantumleap:
+        condition: service_healthy
+    volumes:
+      - ./infra/orion/subscriptions:/subscriptions:ro
+    entrypoint: ["sh","-c","for f in /subscriptions/*.json; do echo Registering $f; curl -sf -X POST http://orion-ld:1026/ngsi-ld/v1/subscriptions -H 'Content-Type: application/ld+json' -d @\$f && echo Registered $f || echo Failed $f; done"]
+    networks:
+      - waste-net
+    restart: "no"
     environment:
       IOTA_LOG_LEVEL: ${IOTA_LOG_LEVEL:-INFO}
       IOTA_TIMESTAMP: ${IOTA_TIMESTAMP:-true}

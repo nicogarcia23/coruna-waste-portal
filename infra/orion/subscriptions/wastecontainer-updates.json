@@ -1,0 +1,10 @@
+{
+  "description": "WasteContainer updates -> backend hook",
+  "type": "Subscription",
+  "entities": [ { "type": "WasteContainer" } ],
+  "notification": {
+    "attributes": ["fillLevel","status","lastSeen"],
+    "format": "normalized",
+    "endpoint": { "uri": "http://backend-api:8000/api/v1/hooks/orion", "accept": "application/json" }
+  }
+}

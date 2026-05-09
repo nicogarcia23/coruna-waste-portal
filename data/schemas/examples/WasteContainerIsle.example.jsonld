@@ -1,0 +1,9 @@
+{
+  "id": "urn:ngsi-ld:WasteContainerIsle:coruna-ISLE-01",
+  "type": "WasteContainerIsle",
+  "@context": ["../context/context.jsonld"],
+  "name": { "type": "Property", "value": "Illote_Cidade_Vella_01" },
+  "description": { "type": "Property", "value": "Isla de contenedores en Praza da Constitución" },
+  "areaServed": { "type": "Property", "value": "Cidade Vella" },
+  "location": { "type": "GeoProperty", "value": { "type": "Polygon", "coordinates": [[[-8.3890,43.3730],[-8.3875,43.3730],[-8.3875,43.3740],[-8.3890,43.3740],[-8.3890,43.3730]]] } }
+}

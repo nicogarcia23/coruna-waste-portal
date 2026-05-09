@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WasteContainer",
+  "type": "object",
+  "required": ["id", "type", "@context"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^urn:ngsi-ld:[A-Za-z]+:[A-Za-z0-9-]+$" },
+    "type": { "const": "WasteContainer" },
+    "@context": { "type": ["array","string"] },
+    "name": { "type": "object", "properties": {"type": {"const":"Property"}, "value": {"type":"string"}}, "required": ["type","value"] },
+    "description": { "type": "object" },
+    "containerType": { "type": "object", "properties": {"type": {"const":"Property"}, "value": {"type":"string", "enum":["organic","paper","glass","plastic","general","bulky"]}}, "required": ["type","value"] },
+    "capacity": { "type": "object" },
+    "modelId": { "type": "object", "properties": {"type": {"const":"Relationship"}, "object": {"type":"string", "pattern":"^urn:ngsi-ld:[A-Za-z]+:[A-Za-z0-9-]+$"}}, "required": ["type","object"] },
+    "isleId": { "type": "object", "properties": {"type": {"const":"Relationship"}, "object": {"type":"string"}}, "required": ["type","object"] },
+    "location": { "type": "object", "properties": {"type": {"const":"GeoProperty"}, "value": {"type":"object"}}, "required": ["type","value"] },
+    "fillLevel": { "type": "object", "properties": {"type": {"const":"Property"}, "value": {"type":"number"}}, "required": ["type","value"] },
+    "status": { "type": "object" },
+    "lastSeen": { "type": "object" },
+    "communicationProtocol": { "type": "object", "properties": {"type": {"const":"Property"}, "value": {"type":"string","enum":["mqtt","http"]}}, "required": ["type","value"] }
+  }
+}

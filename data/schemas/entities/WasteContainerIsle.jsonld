@@ -1,0 +1,12 @@
+{
+  "@context": ["../context/context.jsonld"],
+  "@type": "https://smartdatamodels.org/SmartDataModels/WasteContainerIsle",
+  "description": "NGSI-LD semantic description for WasteContainerIsle",
+  "properties": {
+    "name": { "@type": "Property" },
+    "description": { "@type": "Property" },
+    "areaServed": { "@type": "Property" },
+    "location": { "@type": "GeoProperty", "description": "GeoJSON Polygon footprint of isle" },
+    "refContainer": { "@type": "Relationship", "description": "Optional reverse reference to containers" }
+  }
+}

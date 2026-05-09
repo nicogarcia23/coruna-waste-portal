@@ -1,0 +1,19 @@
+{
+  "@context": [
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "https://w3id.org/smartdatamodels/context.jsonld",
+    {
+      "waste": "urn:ngsi-ld:coru%C3%B1a-waste:",
+      "municipalityCode": "waste:municipalityCode",
+      "cityDistrict": "waste:cityDistrict",
+      "areaServed": "https://schema.org/areaServed",
+      "manufacturer": "https://schema.org/manufacturer",
+      "name": "https://schema.org/name",
+      "description": "https://schema.org/description",
+      "temperature": "https://saref.etsi.org/core/temperature",
+      "battery": "https://saref.etsi.org/core/Battery",
+      "moisture": "https://saref.etsi.org/core/moisture",
+      "observedAt": "https://www.w3.org/2006/time#inXSDDateTime"
+    }
+  ]
+}
