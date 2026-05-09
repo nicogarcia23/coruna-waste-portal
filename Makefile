@@ -1,12 +1,14 @@
 COMPOSE = docker compose --env-file infra/.env -f infra/docker-compose.yml
 
-.PHONY: up up-all down logs ps reset
+.PHONY: up up-all all down logs ps reset backend-local frontend-local
 
 up:
 	$(COMPOSE) up -d
 
 up-all:
 	$(COMPOSE) --profile app up -d
+
+all: up-all
 
 down:
 	$(COMPOSE) down
@@ -24,6 +26,12 @@ reset:
 	else \
 		echo "Aborted."; \
 	fi
+
+backend-local:
+	cd backend && $(PYTHON) -m pip install -r requirements.txt && $(PYTHON) -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+frontend-local:
+	cd frontend && npm install && npm start
 
 .PHONY: mock-generate mock-ingest-current mock-ingest-historical mock-validate
 
