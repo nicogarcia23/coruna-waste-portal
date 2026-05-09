@@ -109,6 +109,8 @@ For detailed architecture information, see [docs/architecture.md](docs/architect
    - Grafana: http://localhost:3001 (default: admin/admin)
    - Orion Context Broker: http://localhost:1026
 
+**Troubleshooting:** If you see Docker or TLS errors, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md#docker-desktop-on-wslwindows-specific-issues).
+
 For logs and teardown:
 
 ```bash
@@ -116,7 +118,7 @@ make logs
 make down
 ```
 
-**If you encounter issues during `make up all`, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).**
+**Troubleshooting:** If you encounter Docker or TLS certificate errors, see [Docker Desktop Specific Issues](docs/TROUBLESHOOTING.md#docker-desktop-on-wslwindows-specific-issues).
 
 ## Run Backend and Frontend Locally (without Docker for app layer)
 

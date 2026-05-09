@@ -75,24 +75,96 @@ make up all
 # Wait 5-10 minutes for retries
 ```
 
-#### 6. **Check Network Configuration**
-```bash
-# Check DNS resolution
-nslookup docker.io
+#### 6. **Change Docker DNS** (for WSL/Docker Desktop)
+If you're using Docker Desktop on Windows with WSL:
 
-# Test connectivity to Docker Hub
-curl -I https://hub.docker.com
+1. Open Docker Desktop settings → Resources → Network
+2. Check "Use a fixed gateway IP"  
+3. Change DNS server to `8.8.8.8` (Google) or `1.1.1.1` (Cloudflare)
+4. Click "Apply & Restart"
 
-# If using a proxy, configure Docker:
-# Edit ~/.docker/config.json or Docker Desktop settings
+Or edit `~/.docker/daemon.json`:
+```json
+{
+  "dns": ["8.8.8.8", "8.8.4.4", "1.1.1.1"]
+}
 ```
 
-#### 7. **Wait and Retry Later**
+Then restart Docker Desktop from Windows (right-click → Restart).
+
+#### 7. **Restart Docker Desktop Properly** (for WSL/Windows)
+```bash
+# From Windows PowerShell (as Administrator):
+Restart-Service com.docker.service
+
+# Or from WSL terminal:
+# Click Docker icon → Restart
+
+# Verify Docker is running:
+docker ps
+```
+
+#### 8. **Check WSL Network Configuration**
+If using WSL, verify nameserver:
+```bash
+cat /etc/resolv.conf
+# Should show: nameserver 8.8.8.8 or similar
+
+# If not, edit /etc/wsl.conf
+sudo nano /etc/wsl.conf
+# Add or modify:
+[interop]
+appendWindowsPath = true
+```
+
+#### 9. **Wait and Retry Later**
 Sometimes Docker Hub CDN has temporary outages. Wait 15-30 minutes and retry:
 ```bash
 sleep 1800  # Wait 30 minutes
 make up all
 ```
+
+## Docker Desktop on WSL/Windows Specific Issues
+
+### Docker Service Not Found Error
+**Error:** `Failed to restart docker.service: Unit docker.service not found`
+
+**Cause:** You're using Docker Desktop (managed from Windows), not systemd service.
+
+**Solution:** Restart Docker Desktop from Windows:
+1. Right-click Docker icon in system tray (bottom right)
+2. Select "Restart"
+3. Wait 30 seconds for Docker to restart
+4. Return to WSL terminal and retry: `make up all`
+
+Or use PowerShell:
+```powershell
+# From Windows PowerShell as Administrator:
+Restart-Service com.docker.service
+# Then in WSL:
+cd ~/coruna-waste-portal && make up all
+```
+
+### TLS Certificate Verification Errors from Docker Hub
+**Error:** 
+```
+failed to copy: httpReadSeeker: failed open: failed to do request:
+tls: failed to verify certificate: x509: certificate is not valid
+```
+
+**Cause:** Docker Hub CDN (Cloudflare) certificate issue, often related to network/DNS from WSL.
+
+**Quick Fix:**
+1. Restart Docker Desktop from Windows (see above)
+2. Wait 2-3 minutes
+3. Retry in WSL: `make up all`
+
+**If that doesn't work:**
+1. Open Docker Desktop → Settings → Resources → Network
+2. Uncheck then recheck "Use a fixed gateway IP"
+3. Change DNS to `8.8.8.8` (Google) 
+4. Click "Apply & Restart"
+5. Return to WSL and try again
 
 ## Services Not Starting
 
