@@ -91,7 +91,7 @@ services:
     restart: "no"
 
   timescaledb:
-    image: timescale/timescaledb-ha:pg16-latest
+    image: timescale/timescaledb-ha:pg16-all
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-waste}
