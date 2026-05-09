@@ -116,6 +116,8 @@ make logs
 make down
 ```
 
+**If you encounter issues during `make up all`, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).**
+
 ## Run Backend and Frontend Locally (without Docker for app layer)
 
 You can keep FIWARE dependencies in Docker and run app services locally.
