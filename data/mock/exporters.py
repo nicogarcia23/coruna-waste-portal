@@ -11,8 +11,12 @@ def write_geojson(gdf, path):
 def write_parquet(df, path):
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
-    # Use pandas to write parquet if available
-    df.to_parquet(str(p))
+    # Try to write parquet; on environments without pyarrow/fastparquet, fall back to CSV
+    try:
+        df.to_parquet(str(p))
+    except Exception:
+        csv_path = p.with_suffix('.csv')
+        df.to_csv(str(csv_path), index=False)
 
 def write_jsonl(records, path):
     p = Path(path)

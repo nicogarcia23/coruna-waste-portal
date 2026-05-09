@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
-import argparse
+import sys
 from pathlib import Path
+# ensure local package imports work when executed as a script
+HERE = Path(__file__).parent.resolve()
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+import argparse
 from datetime import datetime
 import json
 import numpy as np
@@ -8,9 +14,9 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point, Polygon
 
-from .utils import make_rng, district_slug, container_id, isle_id, load_config, timestamp_compact
-from .districts import fetch_district_polygons
-from .exporters import write_geojson, write_parquet, write_jsonl, write_orion_payloads
+from utils import make_rng, district_slug, container_id, isle_id, load_config, timestamp_compact
+from districts import fetch_district_polygons
+from exporters import write_geojson, write_parquet, write_jsonl, write_orion_payloads
 
 DISTRICT_NAMES = [
     "Cidade Vella/Centro","Ensanche-Juan Flórez","Monte Alto","Riazor-Orzán",

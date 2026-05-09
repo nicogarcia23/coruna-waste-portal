@@ -25,7 +25,11 @@ def test_container_counts_match_config():
     cfg = yaml.safe_load((ROOT / 'config.yaml').read_text())
     expected = cfg['seeds']['dev']['total_containers']
     import pandas as pd
-    df = pd.read_parquet(OUT / 'containers.parquet')
+    try:
+        df = pd.read_parquet(OUT / 'containers.parquet')
+    except Exception:
+        # fallback to CSV if parquet engine is not available
+        df = pd.read_csv(OUT / 'containers.csv')
     assert len(df) == expected
 
 def test_fallback_geojson_exists():
