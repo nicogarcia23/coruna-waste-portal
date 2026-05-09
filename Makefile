@@ -24,3 +24,20 @@ reset:
 	else \
 		echo "Aborted."; \
 	fi
+
+.PHONY: mock-generate mock-ingest-current mock-ingest-historical mock-validate
+
+PYTHON ?= python
+SEED ?= dev
+
+mock-generate:
+	cd data/mock && $(PYTHON) generate.py --seed $(SEED)
+
+mock-ingest-current:
+	cd data/mock && $(PYTHON) ingest_orion.py --seed $(SEED)
+
+mock-ingest-historical:
+	cd data/mock && $(PYTHON) ingest_historical.py --seed $(SEED)
+
+mock-validate:
+	cd data/mock && $(PYTHON) -m pytest tests/test_mock_generator.py -q
