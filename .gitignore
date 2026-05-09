@@ -190,5 +190,7 @@ $RECYCLE.BIN/
 .aws/
 .gcp/
 infra/.env
+data/mock/output/
+data/mock/output/districts.geojson
 timescaledb-data/
 grafana-data/
