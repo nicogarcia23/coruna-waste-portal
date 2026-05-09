@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WasteContainerIsle",
+  "type": "object",
+  "required": ["id","type","@context"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^urn:ngsi-ld:[A-Za-z]+:[A-Za-z0-9-]+$" },
+    "type": { "const": "WasteContainerIsle" },
+    "@context": { "type": ["array","string"] },
+    "name": { "type": "object" },
+    "description": { "type": "object" },
+    "areaServed": { "type": "object" },
+    "location": { "type": "object", "properties": {"type": {"const":"GeoProperty"}, "value": {"type":"object"}}, "required": ["type","value"] },
+    "refContainer": { "type": "object" }
+  }
+}

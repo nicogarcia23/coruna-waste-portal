@@ -44,6 +44,8 @@ Recommended local namespace:
 }
 ```
 
+Cross-reference: Phase 2 stores canonical JSON-LD schema and examples under `data/schemas/` in the repository. JSON Schema 2020-12 validation files and examples live under `data/schemas/jsonschema/` and `data/schemas/examples/` respectively. Context composition is defined in `data/schemas/context/context.jsonld`.
+
 ## NGSI-LD Entity Models
 
 ### 1. WasteContainer

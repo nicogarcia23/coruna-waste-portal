@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WasteContainerModel",
+  "type": "object",
+  "required": ["id","type","@context"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^urn:ngsi-ld:[A-Za-z]+:[A-Za-z0-9-]+$" },
+    "type": { "const": "WasteContainerModel" },
+    "@context": { "type": ["array","string"] },
+    "manufacturer": { "type": "object" },
+    "modelNumber": { "type": "object" },
+    "capacity": { "type": "object" },
+    "sensorSpec": { "type": "object" },
+    "communicationProtocol": { "type": "object", "properties": {"type": {"const":"Property"}, "value": {"type":"string","enum":["mqtt","http"]}}, "required": ["type","value"] }
+  }
+}

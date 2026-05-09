@@ -1,0 +1,10 @@
+{
+  "description": "WasteObserved -> QuantumLeap time-series ingestion",
+  "type": "Subscription",
+  "entities": [ { "type": "WasteObserved" } ],
+  "notification": {
+    "attributes": ["fillLevel","temperature","battery","refContainer","dateObserved"],
+    "format": "normalized",
+    "endpoint": { "uri": "http://quantumleap:8668/v2/notify", "accept": "application/json" }
+  }
+}

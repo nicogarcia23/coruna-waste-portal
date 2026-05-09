@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WasteObserved",
+  "type": "object",
+  "required": ["id","type","@context"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^urn:ngsi-ld:[A-Za-z]+:[A-Za-z0-9-]+$" },
+    "type": { "const": "WasteObserved" },
+    "@context": { "type": ["array","string"] },
+    "refContainer": { "type": "object", "properties": {"type": {"const":"Relationship"}, "object": {"type":"string","pattern":"^urn:ngsi-ld:[A-Za-z]+:[A-Za-z0-9-]+$"}}, "required": ["type","object"] },
+    "fillLevel": { "type": "object", "properties": {"type": {"const":"Property"}, "value": {"type":"number"}}, "required": ["type","value"] },
+    "temperature": { "type": "object" },
+    "battery": { "type": "object" },
+    "moisture": { "type": "object" },
+    "dateObserved": { "type": "object" }
+  }
+}

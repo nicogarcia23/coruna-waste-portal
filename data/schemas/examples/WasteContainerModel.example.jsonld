@@ -1,0 +1,9 @@
+{
+  "id": "urn:ngsi-ld:WasteContainerModel:icr-2020-240L",
+  "type": "WasteContainerModel",
+  "@context": ["../context/context.jsonld"],
+  "manufacturer": { "type": "Property", "value": "ICR Contenedores" },
+  "modelNumber": { "type": "Property", "value": "ICR-240L-2020" },
+  "capacity": { "type": "Property", "value": 240, "unitCode": "LTR" },
+  "communicationProtocol": { "type": "Property", "value": "mqtt" }
+}
