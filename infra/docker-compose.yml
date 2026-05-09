@@ -112,7 +112,7 @@ services:
       - waste-net
 
   quantumleap:
-    image: smartsdk/quantumleap:latest
+    image: orchestracities/quantumleap:latest
     restart: unless-stopped
     depends_on:
       - orion-ld
