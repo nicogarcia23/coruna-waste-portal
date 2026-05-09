@@ -77,8 +77,8 @@ For detailed architecture information, see [docs/architecture.md](docs/architect
 ### Prerequisites
 - Docker & Docker Compose (v20.10+)
 - Git
-- Python 3.9+ (for backend development)
-- Node.js 16+ (for frontend development)
+- Python 3.10+ (for backend development)
+- Node.js 18+ (for frontend development)
 
 ### Quick Start
 
@@ -88,24 +88,20 @@ For detailed architecture information, see [docs/architecture.md](docs/architect
    cd coruna-waste-portal
    ```
 
-2. **Start the FIWARE stack**
+2. **Prepare environment file**
    ```bash
-   cd infra
-   docker-compose up -d
+   cp infra/.env.example infra/.env
    ```
 
-3. **Run the backend**
+3. **Start the full stack (FIWARE + backend + frontend)**
    ```bash
-   cd ../backend
-   pip install -r requirements.txt
-   python app.py
+   make up-all
    ```
 
-4. **Run the frontend**
+4. **Check services**
    ```bash
-   cd ../frontend
-   npm install
-   npm start
+   make ps
+   curl http://localhost:8000/health
    ```
 
 5. **Access the portal**
@@ -113,7 +109,35 @@ For detailed architecture information, see [docs/architecture.md](docs/architect
    - Grafana: http://localhost:3001 (default: admin/admin)
    - Orion Context Broker: http://localhost:1026
 
-For detailed setup instructions, see the [Getting Started Guide](docs/README.md).
+For logs and teardown:
+
+```bash
+make logs
+make down
+```
+
+## Run Backend and Frontend Locally (without Docker for app layer)
+
+You can keep FIWARE dependencies in Docker and run app services locally.
+
+1. **Start infrastructure dependencies only**
+   ```bash
+   make up
+   ```
+
+2. **Run backend locally**
+   ```bash
+   make backend-local
+   ```
+
+3. **Run frontend locally (new terminal)**
+   ```bash
+   make frontend-local
+   ```
+
+4. **Open**
+   - Frontend: http://localhost:3000
+   - Backend health: http://localhost:8000/health
 
 ## Data Models
 
@@ -141,6 +165,15 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 2. Commit changes: `git commit -m "feat: description"`
 3. Push to branch: `git push origin feature/your-feature-name`
 4. Submit a Pull Request
+
+### Useful Commands
+
+- `make up`: Start infra services (without app profile)
+- `make up-all`: Start infra + backend + frontend
+- `make backend-local`: Run FastAPI locally on port 8000
+- `make frontend-local`: Run static frontend locally on port 3000
+- `make logs`: Follow compose logs
+- `make down`: Stop stack
 
 ## Project Structure
 
