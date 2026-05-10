@@ -1,9 +1,3 @@
-from fastapi import FastAPI
+from src.app import create_app
 
-
-app = FastAPI(title="Smart Waste Management Portal API")
-
-
-@app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+app = create_app()
