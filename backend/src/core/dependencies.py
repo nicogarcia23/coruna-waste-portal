@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 import redis.asyncio as redis
 from src.core.config import get_settings
+from src.clients.osrm import OSRMClient
 from src.clients.orion import OrionLDClient
 from src.clients.vroom import VroomClient
 from src.services.container_service import ContainerService
@@ -49,6 +50,11 @@ def get_vroom_client(
         base_url=settings.vroom_url,
         http_client=http_client,
     )
+
+
+def get_osrm_client(request: Request) -> OSRMClient:
+    """Get the OSRM client built at startup."""
+    return request.app.state.osrm_client
 
 
 def get_container_service(

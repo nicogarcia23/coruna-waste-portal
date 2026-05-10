@@ -162,6 +162,27 @@ services:
     networks:
       - waste-net
 
+  osrm:
+    image: osrm/osrm-backend:latest
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - osrm-data:/data
+    command: >
+      sh -c "
+        if [ ! -f /data/map.osrm ]; then
+          wget -q -O /data/map.pbf
+            https://download.geofabrik.de/europe/spain/galicia-latest.osm.pbf &&
+          osrm-extract -p /opt/car.lua /data/map.pbf &&
+          osrm-partition /data/map.osrm &&
+          osrm-customize /data/map.osrm
+        fi &&
+        osrm-routed --algorithm mld /data/map.osrm --port 5000
+      "
+    networks:
+      - waste-net
+
   backend-api:
     build:
       context: ../backend
@@ -180,6 +201,8 @@ services:
         condition: service_healthy
       vroom:
         condition: service_started
+      osrm:
+        condition: service_started
     environment:
       PORT: 8000
       SECRET_KEY: ${SECRET_KEY:-change-me}
@@ -188,6 +211,7 @@ services:
       TIMESCALEDB_URL: ${TIMESCALEDB_URL:-postgresql://${POSTGRES_USER:-waste}:${POSTGRES_PASSWORD:-waste-dev-password}@timescaledb:5432/${POSTGRES_DB:-waste}}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       VROOM_URL: ${VROOM_URL:-http://vroom:3000}
+      OSRM_URL: ${OSRM_URL:-http://osrm:5000}
       QUANTUMLEAP_URL: ${QUANTUMLEAP_URL:-http://quantumleap:8668}
     ports:
       - "8000:8000"
@@ -230,6 +254,7 @@ volumes:
   grafana-data:
   mosquitto-data:
   mongodb-data-v5:
+  osrm-data:
 
 networks:
   waste-net:

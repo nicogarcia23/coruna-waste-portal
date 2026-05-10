@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Literal
 from enum import Enum
 
 
@@ -36,6 +36,8 @@ class RouteSummary(BaseModel):
     stops: List[RouteStop]
     total_distance_m: float
     total_load_liters: float
+    geometry: List[List[float]]
+    geometry_type: Literal["osrm", "straight_line"] = "osrm"
 
 
 class UnassignedContainer(BaseModel):
