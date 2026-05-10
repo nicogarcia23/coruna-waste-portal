@@ -11,11 +11,11 @@ services:
       - waste-net
 
   mongodb:
-    image: mongo:7
+    image: mongo:5.0
     restart: unless-stopped
     command: ["mongod", "--bind_ip_all"]
     volumes:
-      - mongodb-data:/data/db
+      - mongodb-data-v5:/data/db
     networks:
       - waste-net
 
@@ -130,7 +130,7 @@ services:
     ports:
       - "8668:8668"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8668/v2/version >/dev/null || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8668/v2/ >/dev/null || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
@@ -229,7 +229,7 @@ volumes:
   timescaledb-data:
   grafana-data:
   mosquitto-data:
-  mongodb-data:
+  mongodb-data-v5:
 
 networks:
   waste-net:

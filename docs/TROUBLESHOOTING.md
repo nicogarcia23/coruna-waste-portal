@@ -166,6 +166,35 @@ tls: failed to verify certificate: x509: certificate is not valid
 4. Click "Apply & Restart"
 5. Return to WSL and try again
 
+## Orion LD Crashes with MongoDB 7 Compatibility Error
+
+### Symptom
+Orion LD container exits with error:
+```
+Unsupported OP_QUERY command: listDatabases
+terminate called after throwing an instance of 'mongo::MsgAssertionException'
+what(): field not found, expected type 4
+```
+
+### Cause
+Orion LD 1.6.0 uses an older MongoDB driver that uses the deprecated **OP_QUERY** protocol. MongoDB 7.0+ removed support for OP_QUERY and only supports the newer **OP_MSG** protocol. This driver incompatibility causes Orion to crash on startup.
+
+### Solution
+Use MongoDB 5.0 instead of 7.x. Edit [infra/docker-compose.yml](../infra/docker-compose.yml):
+
+```yaml
+mongodb:
+   image: mongo:5.0  # Change from mongo:7 to mongo:5.0
+  restart: unless-stopped
+  # ... rest of config
+```
+
+Then restart all services:
+```bash
+make down
+make up all
+```
+
 ## Services Not Starting
 
 ### Symptom
