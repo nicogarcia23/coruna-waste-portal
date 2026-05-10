@@ -67,6 +67,62 @@ components:
       properties:
         timestamp: { type: string }
         fillLevel: { type: number }
+    RouteStop:
+      type: object
+      properties:
+        container_id: { type: string }
+        order: { type: integer }
+        distance_m: { type: number }
+    RouteSummary:
+      type: object
+      properties:
+        vehicle_id: { type: integer }
+        stops:
+          type: array
+          items: { $ref: '#/components/schemas/RouteStop' }
+        total_distance_m: { type: number }
+        total_load_liters: { type: number }
+    UnassignedContainer:
+      type: object
+      properties:
+        container_id: { type: string }
+        reason: { type: string }
+    RouteSummaryTotal:
+      type: object
+      properties:
+        total_distance_m: { type: number }
+        total_containers: { type: integer }
+        total_vehicles: { type: integer }
+    RouteOptimizeRequest:
+      type: object
+      properties:
+        container_ids:
+          type: array
+          items: { type: string }
+        waste_type: { type: string, enum: [organic, glass, paper, plastic, general] }
+        isle_id: { type: string }
+        min_fill_threshold: { type: number, default: 0.60 }
+        vehicle_count: { type: integer, minimum: 1, maximum: 20 }
+        vehicle_capacity_liters: { type: integer, minimum: 100, maximum: 50000 }
+        depot_lat: { type: number, minimum: -90, maximum: 90 }
+        depot_lon: { type: number, minimum: -180, maximum: 180 }
+        debug: { type: boolean, default: false }
+      required:
+        - vehicle_count
+        - vehicle_capacity_liters
+        - depot_lat
+        - depot_lon
+    RouteOptimizeResponse:
+      type: object
+      properties:
+        routes:
+          type: array
+          items: { $ref: '#/components/schemas/RouteSummary' }
+        unassigned:
+          type: array
+          items: { $ref: '#/components/schemas/UnassignedContainer' }
+        summary: { $ref: '#/components/schemas/RouteSummaryTotal' }
+        debug: { type: object }
 
 security: []
 paths:
@@ -197,6 +253,27 @@ paths:
                     items: { $ref: '#/components/schemas/HistoryRecord' }
                   total: { type: integer }
 
+  /api/v1/operators/routes/optimize:
+    post:
+      tags: [operator]
+      security: [{ BearerAuth: [] }]
+      summary: Optimize waste collection routes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RouteOptimizeRequest' }
+      responses:
+        '200':
+          description: Optimized routes
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RouteOptimizeResponse' }
+        '401':
+          description: Unauthorized
+        '502':
+          description: Route optimization service error
+
   /api/v1/entities:
     post:
       tags: [admin]
@@ -236,11 +313,12 @@ paths:
 
   /api/v1/hooks/orion:
     post:
-      tags: [admin]
+      tags: [webhooks]
+      summary: Receive Orion-LD entity change notifications
       requestBody:
         required: true
         content:
           application/json:
             schema: { type: object }
       responses:
-        '200': { description: OK }
+        '200': { description: Webhook received and processed }
