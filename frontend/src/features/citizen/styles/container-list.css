@@ -1,0 +1,136 @@
+/* Container List */
+.container-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.container-list__header {
+  padding: 8px 0 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+.container-list__header h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.container-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.container-list__item {
+  padding: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.container-list__item:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container-list__item--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.container-list__item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.container-list__item-header strong {
+  font-size: 13px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.waste-type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.waste-type-badge--glass {
+  background: var(--waste-glass);
+  color: white;
+}
+
+.waste-type-badge--plastic {
+  background: var(--waste-plastic);
+  color: white;
+}
+
+.waste-type-badge--metal {
+  background: var(--waste-metal);
+  color: white;
+}
+
+.waste-type-badge--organic {
+  background: var(--waste-organic);
+  color: white;
+}
+
+.waste-type-badge--paper {
+  background: var(--waste-paper);
+  color: white;
+}
+
+.container-list__item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.container-list__item-body .label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge--ok {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge--needs-collection {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge--out-of-service {
+  background: #f8d7da;
+  color: #721c24;
+}

@@ -1,0 +1,25 @@
+/* Route Results Map */
+.route-results-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+.stop-marker {
+  margin: 0;
+  padding: 0;
+}
+
+.depot-marker {
+  margin: 0;
+  padding: 0;
+}
+
+.unassigned-marker {
+  margin: 0;
+  padding: 0;
+}
