@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 import redis.asyncio as redis
 from fastapi import FastAPI
 from src.core.config import get_settings
+from src.clients.osrm import OSRMClient
 
 
 settings = get_settings()
@@ -38,6 +39,7 @@ async def lifespan(app: FastAPI):
     
     # Store in app state for dependency injection
     app.state.http_client = http_client
+    app.state.osrm_client = OSRMClient(base_url=settings.osrm_url, http_client=http_client)
     app.state.db_engine = engine
     app.state.async_session = async_session
     app.state.redis_client = redis_client

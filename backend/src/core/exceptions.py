@@ -32,6 +32,11 @@ class VroomError(Exception):
     pass
 
 
+class OSRMError(Exception):
+    """Base exception for OSRM service errors."""
+    pass
+
+
 class CacheError(Exception):
     """Base exception for Redis cache errors."""
     pass
@@ -58,6 +63,11 @@ def map_exception_to_http(exc: Exception) -> HTTPException:
         return HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Route optimization service error"
+        )
+    elif isinstance(exc, OSRMError):
+        return HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Route geometry service error"
         )
     elif isinstance(exc, (TimescaleError, CacheError)):
         return HTTPException(

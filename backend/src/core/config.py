@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     )
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
     vroom_url: str = Field(default="http://localhost:3002", alias="VROOM_URL")
+    osrm_url: str = Field(default="http://localhost:5000", alias="OSRM_URL")
 
     # Orion-LD configuration
     orion_service_path: str = Field(default="/waste", alias="ORION_SERVICE_PATH")
