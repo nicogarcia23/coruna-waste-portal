@@ -1,0 +1,9 @@
+{
+  "uid": "collection-efficiency",
+  "title": "Collection Efficiency",
+  "tags": ["waste-portal"],
+  "templating": {"list": []},
+  "panels": [],
+  "schemaVersion": 36,
+  "version": 1
+}

@@ -1,0 +1,9 @@
+{
+  "uid": "system-health",
+  "title": "System Health",
+  "tags": ["waste-portal"],
+  "templating": {"list": []},
+  "panels": [],
+  "schemaVersion": 36,
+  "version": 1
+}
