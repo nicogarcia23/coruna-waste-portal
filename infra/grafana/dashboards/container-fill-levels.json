@@ -2,8 +2,124 @@
   "uid": "container-fill-levels",
   "title": "Container Fill Levels",
   "tags": ["waste-portal"],
-  "templating": {"list": []},
-  "panels": [],
+  "timezone": "browser",
   "schemaVersion": 36,
-  "version": 1
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Fill-level waveform smoke test",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, (50 + 30 * SIN(EXTRACT(EPOCH FROM ts) / 3600.0))::double precision AS value FROM generate_series(now() - interval '23 hours', now(), interval '1 hour') AS ts ORDER BY 1",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Second waveform smoke test",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, (20 + 10 * COS(EXTRACT(EPOCH FROM ts) / 3600.0))::double precision AS value FROM generate_series(now() - interval '23 hours', now(), interval '1 hour') AS ts ORDER BY 1",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Database metadata snapshot",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT * FROM (VALUES ('database', current_database()), ('user', current_user), ('server_time', to_char(now(), 'YYYY-MM-DD HH24:MI:SS')), ('server_version', version())) AS t(metric, value)",
+          "editorMode": "code"
+        }
+      ]
+    }
+  ]
 }
