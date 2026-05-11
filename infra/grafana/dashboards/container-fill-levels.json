@@ -1,0 +1,9 @@
+{
+  "uid": "container-fill-levels",
+  "title": "Container Fill Levels",
+  "tags": ["waste-portal"],
+  "templating": {"list": []},
+  "panels": [],
+  "schemaVersion": 36,
+  "version": 1
+}

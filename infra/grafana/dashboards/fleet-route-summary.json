@@ -1,0 +1,9 @@
+{
+  "uid": "fleet-route-summary",
+  "title": "Fleet & Route Summary",
+  "tags": ["waste-portal"],
+  "templating": {"list": []},
+  "panels": [],
+  "schemaVersion": 36,
+  "version": 1
+}

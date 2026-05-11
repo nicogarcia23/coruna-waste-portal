@@ -6,6 +6,8 @@ from src.clients.osrm import OSRMClient
 from src.clients.orion import OrionLDClient
 from src.clients.vroom import VroomClient
 from src.core.exceptions import VroomError, OSRMError
+import asyncio
+from src.repositories.route_repository import RouteRepository
 
 
 logger = logging.getLogger(__name__)
@@ -235,7 +237,7 @@ class RouteService:
                     )
                 )
         
-        return RouteOptimizeResponse(
+        response = RouteOptimizeResponse(
             routes=routes,
             unassigned=unassigned,
             summary=RouteSummaryTotal(
@@ -245,6 +247,41 @@ class RouteService:
             ),
             debug=vroom_response if request.debug else None
         )
+
+        # Persist a lightweight route summary asynchronously (fire-and-forget)
+        try:
+            summary_row = {
+                "run_at": None,
+                "waste_type": getattr(request, "waste_type", None),
+                "isle_id": getattr(request, "isle_id", None),
+                "vehicle_count": request.vehicle_count,
+                "containers_collected": sum(len(r.stops) for r in routes),
+                "unassigned_count": len(unassigned),
+                "total_distance_m": total_distance,
+                "total_load_liters": total_load,
+                "geometry_type": routes[0].geometry_type if routes else None,
+                "raw_response": vroom_response,
+            }
+
+            async def _persist_summary(app_session):
+                try:
+                    repo = RouteRepository(app_session)
+                    await repo.insert_route_summary(summary_row)
+                except Exception:
+                    logger.exception("Failed to persist route summary")
+
+            # Try to obtain an AsyncSession from the RouteService if attached
+            app_session = getattr(self, "db_session", None)
+            if app_session is not None:
+                try:
+                    asyncio.create_task(_persist_summary(app_session))
+                except Exception:
+                    logger.debug("Failed to schedule async persistence task for route summary")
+        except Exception:
+            logger.debug("Route summary persistence setup failed; continuing without persistence")
+
+        return response
+
 
     def _build_straight_line_geometry(
         self,

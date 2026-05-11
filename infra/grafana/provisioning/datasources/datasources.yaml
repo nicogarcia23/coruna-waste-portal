@@ -1,0 +1,20 @@
+apiVersion: 1
+datasources:
+  - name: TimescaleDB
+    type: postgres
+    url: ${GRAFANA_DB_HOST}:${GRAFANA_DB_PORT}
+    user: ${GRAFANA_DB_USER}
+    secureJsonData:
+      password: ${GRAFANA_DB_PASSWORD}
+    jsonData:
+      database: ${GRAFANA_DB_NAME}
+      sslmode: disable
+      timescaledb: true
+      postgresVersion: 1600
+    isDefault: true
+
+  - name: WastePortalAPI
+    type: yesoreyeram-infinity-datasource
+    jsonData:
+      base_url: http://backend-api:8000
+    isDefault: false
