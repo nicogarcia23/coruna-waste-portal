@@ -1,11 +1,23 @@
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
-RUN npm install -g serve
+COPY package.json package-lock.json ./
 
-COPY index.html /app/index.html
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 3000
 
-CMD ["serve", "-s", ".", "-l", "3000"]
+CMD ["nginx", "-g", "daemon off;"]

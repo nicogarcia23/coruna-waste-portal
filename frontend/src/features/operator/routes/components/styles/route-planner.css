@@ -1,0 +1,49 @@
+/* Route Planner Page */
+.route-planner-page {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  height: calc(100vh - 60px);
+  gap: 0;
+}
+
+.route-planner-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-alt);
+  border-right: 1px solid var(--color-border);
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.route-planner-page__map {
+  position: relative;
+}
+
+.route-planner-page__empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.route-planner-page__summary {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .route-planner-page {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .route-planner-page__sidebar {
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+}

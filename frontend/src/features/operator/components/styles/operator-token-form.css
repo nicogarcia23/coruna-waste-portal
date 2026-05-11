@@ -1,0 +1,107 @@
+/* Operator Token Form (in components subdirectory) */
+.operator-token-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+}
+
+.operator-token-form--standalone {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-bg));
+}
+
+.operator-token-form__container {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.operator-token-form__header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.operator-token-form__header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: var(--color-text);
+}
+
+.operator-token-form__header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.operator-token-form__form {
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-input--error {
+  border-color: var(--color-error);
+}
+
+.form-error {
+  font-size: 12px;
+  color: var(--color-error);
+  margin-top: 4px;
+}
+
+.operator-token-form__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-large {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.operator-token-form__info {
+  padding: 12px 16px;
+  background: var(--color-bg-alt);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-primary);
+}
+
+.operator-token-form__info p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
