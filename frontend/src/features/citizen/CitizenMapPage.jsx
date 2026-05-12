@@ -4,6 +4,8 @@ import { useCitizenNearbyQuery } from '../../hooks/useCitizenNearbyQuery'
 import NearbySearchControls from './components/NearbySearchControls'
 import ContainerList from './components/ContainerList'
 import { createContainerIcon } from '../../utils/map'
+import MapErrorBoundary from '../../components/common/MapErrorBoundary'
+import MapLegend from './components/MapLegend'
 import './styles/citizen-map.css'
 
 export default function CitizenMapPage() {
@@ -41,15 +43,33 @@ export default function CitizenMapPage() {
     setMapCenter([newLat, newLon])
   }, [])
 
-  const markers = useMemo(
-    () =>
-      containers.map((container) => ({
-        id: container.id,
-        position: [container.location.latitude, container.location.longitude],
-        container,
-      })),
-    [containers]
-  )
+  function extractLatLon(container) {
+    try {
+      const coords = container?.location?.value?.coordinates
+      if (coords && Array.isArray(coords) && coords.length >= 2) {
+        const lon = Number(coords[0])
+        const lat = Number(coords[1])
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
+        return [lat, lon]
+      }
+
+      if (
+        container?.location?.latitude != null &&
+        container?.location?.longitude != null
+      ) {
+        const lat = Number(container.location.latitude)
+        const lon = Number(container.location.longitude)
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
+        return [lat, lon]
+      }
+
+      return null
+    } catch (e) {
+      return null
+    }
+  }
+
+  const markers = useMemo(() => containers.map((c) => ({ id: c.id, position: extractLatLon(c), container: c })), [containers])
 
   const userLocation = lat && lon ? [lat, lon] : null
 
@@ -89,6 +109,7 @@ export default function CitizenMapPage() {
       </aside>
 
       <div className="citizen-map-page__map">
+        <MapErrorBoundary>
         <MapContainer center={mapCenter} zoom={13} className="map-container">
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -101,36 +122,42 @@ export default function CitizenMapPage() {
                 <Popup>Your location</Popup>
               </Marker>
               <Polyline
-                positions={userLocation}
+                positions={[mapCenter, userLocation]}
                 color="blue"
                 weight={2}
-                radius={radius}
                 dashArray="5, 5"
                 interactive={false}
               />
             </>
           )}
 
-          {markers.map(({ id, position, container }) => (
-            <Marker
-              key={id}
-              position={position}
-              icon={createContainerIcon(container.waste_type, container.fill_level)}
-              eventHandlers={{
-                click: () => setSelectedContainer(id),
-              }}
-            >
-              <Popup>
-                <div>
-                  <strong>{container.name}</strong>
-                  <div>{container.waste_type}</div>
-                  <div>Fill: {Math.round(container.fill_level)}%</div>
-                  <div>Last updated: {new Date(container.last_updated).toLocaleString('es-ES')}</div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+          {markers.map(({ id, position, container }) => {
+            try {
+              if (!position || !Array.isArray(position) || position.length < 2) return null
+              return (
+                <Marker
+                  key={id}
+                  position={position}
+                  icon={createContainerIcon(container.waste_type, container.fill_level)}
+                  eventHandlers={{ click: () => setSelectedContainer(id) }}
+                >
+                  <Popup>
+                    <div>
+                      <strong>{container.name}</strong>
+                      <div>{container.waste_type}</div>
+                      <div>Fill: {Math.round(container.fill_level)}%</div>
+                      <div>Last updated: {new Date(container.last_updated).toLocaleString('es-ES')}</div>
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            } catch (e) {
+              return null
+            }
+          })}
+          <MapLegend />
         </MapContainer>
+        </MapErrorBoundary>
       </div>
     </div>
   )
