@@ -2,22 +2,41 @@
 import argparse
 import asyncio
 import json
+import sys
 from pathlib import Path
 import httpx
 from tqdm.asyncio import tqdm
 
-from .utils import load_config
+# ensure local package imports work when executed as a script
+HERE = Path(__file__).parent.resolve()
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from utils import load_config
+
+CORE_CONTEXT = ["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"]
+
+
+def ensure_context(entity: dict) -> dict:
+    """Attach a local NGSI-LD context if the payload does not define one."""
+    if "@context" in entity:
+        return entity
+
+    payload = dict(entity)
+    payload["@context"] = CORE_CONTEXT
+    return payload
 
 async def post_entity(client, url, ent, semaphore):
     async with semaphore:
         try:
-            r = await client.post(url + '/ngsi-ld/v1/entities', json=ent, headers={'Content-Type':'application/ld+json'})
+            payload = ensure_context(ent)
+            r = await client.post(url + '/ngsi-ld/v1/entities', json=payload, headers={'Content-Type':'application/ld+json'})
             if r.status_code in (201, 204):
                 return True, None
             if r.status_code == 409:
                 # conflict: update attributes
-                eid = ent['id']
-                attrs = {k:v for k,v in ent.items() if k not in ('id','type')}
+                eid = payload['id']
+                attrs = {k:v for k,v in payload.items() if k not in ('id','type','@context')}
                 pr = await client.patch(url + f'/ngsi-ld/v1/entities/{eid}/attrs', json=attrs, headers={'Content-Type':'application/ld+json'})
                 return pr.status_code in (204,200), pr.text
             return False, r.text
@@ -27,7 +46,6 @@ async def post_entity(client, url, ent, semaphore):
 async def run(seed, dry_run=False):
     cfg = load_config(Path(__file__).parent / 'config.yaml')
     out = Path(__file__).parent / 'output' / seed / 'orion_payloads'
-    url = (out.parent.parent.parent.parent / 'infra')
     # read env ORION_LD_URL
     import os
     ORION_LD_URL = os.getenv('ORION_LD_URL', 'http://localhost:1026')

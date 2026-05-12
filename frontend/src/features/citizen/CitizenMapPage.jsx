@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import { useCitizenNearbyQuery } from '../../hooks/useCitizenNearbyQuery'
 import NearbySearchControls from './components/NearbySearchControls'
 import ContainerList from './components/ContainerList'
@@ -8,19 +8,54 @@ import MapErrorBoundary from '../../components/common/MapErrorBoundary'
 import MapLegend from './components/MapLegend'
 import './styles/citizen-map.css'
 
+const DEFAULT_CENTER = [43.3734, -8.3879]
+
+function inferWasteType(container) {
+  const candidates = ['organic', 'paper', 'glass', 'plastic', 'general']
+  const haystack = `${container?.waste_type || ''} ${container?.id || ''} ${container?.name || ''}`.toLowerCase()
+  return candidates.find((candidate) => haystack.includes(candidate)) || 'general'
+}
+
+function MapAutoFit({ points }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!points || points.length === 0) return
+
+    const bounds = points.map((point) => [point[0], point[1]])
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 16 })
+  }, [map, points])
+
+  return null
+}
+
 export default function CitizenMapPage() {
-  const [lat, setLat] = useState(null)
-  const [lon, setLon] = useState(null)
+  const [lat, setLat] = useState(DEFAULT_CENTER[0])
+  const [lon, setLon] = useState(DEFAULT_CENTER[1])
   const [radius, setRadius] = useState(500)
   const [wasteTypes, setWasteTypes] = useState(['Glass', 'Plastic', 'Metal', 'Organic', 'Paper'])
   const [selectedContainer, setSelectedContainer] = useState(null)
-  const [mapCenter, setMapCenter] = useState([42.3401, -8.3885]) // Default A Coruña center
+  const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER)
 
   const { data, isLoading, error, refetch } = useCitizenNearbyQuery(
     lat && lon ? { lat, lon, radius, waste_types: wasteTypes } : null
   )
 
-  const containers = data?.containers || []
+  const normalizeContainer = useCallback((container) => ({
+    id: container.id,
+    name: container.name || container.id,
+    waste_type: container.waste_type || container.containerType || inferWasteType(container),
+    fill_level: container.fill_level ?? container.fillLevel ?? null,
+    status: container.status || 'unknown',
+    last_updated: container.last_updated || container.lastSeen || null,
+    distance: container.distance,
+    location: container.location,
+  }), [])
+
+  const containers = useMemo(() => {
+    const rawContainers = Array.isArray(data) ? data : data?.containers || []
+    return rawContainers.map(normalizeContainer)
+  }, [data, normalizeContainer])
 
   const handleGeolocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -70,8 +105,12 @@ export default function CitizenMapPage() {
   }
 
   const markers = useMemo(() => containers.map((c) => ({ id: c.id, position: extractLatLon(c), container: c })), [containers])
-
   const userLocation = lat && lon ? [lat, lon] : null
+  const mapPoints = useMemo(() => {
+    const points = [...markers.map((marker) => marker.position).filter(Boolean)]
+    if (userLocation) points.push(userLocation)
+    return points
+  }, [markers, userLocation])
 
   return (
     <div className="citizen-map-page">
@@ -111,6 +150,7 @@ export default function CitizenMapPage() {
       <div className="citizen-map-page__map">
         <MapErrorBoundary>
         <MapContainer center={mapCenter} zoom={13} className="map-container">
+          <MapAutoFit points={mapPoints} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; OpenStreetMap contributors'
@@ -118,7 +158,7 @@ export default function CitizenMapPage() {
 
           {userLocation && (
             <>
-              <Marker position={userLocation} icon={createContainerIcon('general', 0)}>
+                <Marker position={userLocation} icon={createContainerIcon('general', 0)}>
                 <Popup>Your location</Popup>
               </Marker>
               <Polyline
@@ -134,11 +174,14 @@ export default function CitizenMapPage() {
           {markers.map(({ id, position, container }) => {
             try {
               if (!position || !Array.isArray(position) || position.length < 2) return null
+              const markerWasteType = inferWasteType(container)
               return (
                 <Marker
                   key={id}
                   position={position}
-                  icon={createContainerIcon(container.waste_type, container.fill_level)}
+                  icon={createContainerIcon(markerWasteType, container.fill_level ?? 0)}
+                  zIndexOffset={2000}
+                  riseOnHover
                   eventHandlers={{ click: () => setSelectedContainer(id) }}
                 >
                   <Popup>
