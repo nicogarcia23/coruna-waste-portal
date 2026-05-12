@@ -25,12 +25,18 @@ class OrionLDClient:
     def _get_headers(self) -> dict[str, str]:
         """Build common NGSI-LD headers."""
         headers = {
-            "Content-Type": "application/ld+json",
+            "Accept": "application/ld+json",
             "Link": '<https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld>; rel="http://www.w3.org/ns/json-ld#context"'
         }
         if self.tenant:
             headers["FIWARE-Service"] = self.tenant
             headers["FIWARE-ServicePath"] = self.service_path
+        return headers
+
+    def _get_write_headers(self) -> dict[str, str]:
+        """Build headers for NGSI-LD write operations."""
+        headers = self._get_headers()
+        headers["Content-Type"] = "application/ld+json"
         return headers
 
     def _build_georel(self, lat: float, lon: float, radius: int) -> str:
@@ -256,7 +262,7 @@ class OrionLDClient:
             response = await self.http_client.patch(
                 url,
                 json=payload,
-                headers=self._get_headers(),
+                headers=self._get_write_headers(),
                 timeout=10.0
             )
             

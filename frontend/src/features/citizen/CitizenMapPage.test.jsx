@@ -10,6 +10,7 @@ vi.mock('react-leaflet', () => ({
   Marker: () => null,
   Popup: () => null,
   Polyline: () => null,
+  useMap: () => ({ fitBounds: vi.fn() }),
 }))
 
 // Mock useCitizenNearbyQuery
