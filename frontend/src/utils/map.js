@@ -32,17 +32,17 @@ function getShape(type) {
 export function createContainerIcon(wasteType, fillLevel) {
   const wasteColor = getWasteTypeColor(wasteType)
   const fillColor = getFillColor(fillLevel)
-  const shape = getShape(wasteType)
+
+  const html = `<div style="width:32px;height:32px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);background:${wasteColor};display:flex;align-items:center;justify-content:center;">
+      <div style="width:14px;height:14px;border-radius:50%;background:${fillColor};border:2px solid rgba(255,255,255,0.8);"></div>
+    </div>`
 
   return L.divIcon({
-    className: 'container-icon',
+    className: '',
     iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    html: `
-      <div class="container-icon__outer" style="--waste-color:${wasteColor};--fill-color:${fillColor};">
-        <span class="container-icon__shape container-icon__shape--${shape}"></span>
-      </div>
-    `,
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+    html,
   })
 }
 

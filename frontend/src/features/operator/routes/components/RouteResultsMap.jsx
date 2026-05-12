@@ -40,12 +40,34 @@ function createUnassignedMarker() {
 export default function RouteResultsMap({ results }) {
   const { routes, unassigned, depot } = results
 
-  const depotLocation = [depot.location.latitude, depot.location.longitude]
+  function extractLatLonFrom(obj) {
+    try {
+      const coords = obj?.location?.value?.coordinates
+      if (coords && Array.isArray(coords) && coords.length >= 2) {
+        const lon = Number(coords[0])
+        const lat = Number(coords[1])
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
+        return [lat, lon]
+      }
+      if (obj?.location?.latitude != null && obj?.location?.longitude != null) {
+        const lat = Number(obj.location.latitude)
+        const lon = Number(obj.location.longitude)
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
+        return [lat, lon]
+      }
+      return null
+    } catch (e) {
+      return null
+    }
+  }
+
+  const depotLocation = extractLatLonFrom(depot) || [0, 0]
   let mapCenter = depotLocation
 
   if (routes.length > 0 && routes[0].stops.length > 0) {
     const stops = routes[0].stops
-    mapCenter = [stops[0].location.latitude, stops[0].location.longitude]
+    const first = extractLatLonFrom(stops[0])
+    if (first) mapCenter = first
   }
 
   return (
@@ -57,48 +79,60 @@ export default function RouteResultsMap({ results }) {
         />
 
         {/* Depot */}
-        <Marker position={depotLocation} icon={createDepotMarker()}>
+        {depotLocation && (
+          <Marker position={depotLocation} icon={createDepotMarker()}>
           <Popup>
             <strong>Depot</strong>
             <br />
             {depotLocation[0].toFixed(4)}, {depotLocation[1].toFixed(4)}
           </Popup>
-        </Marker>
+          </Marker>
+        )}
 
         {/* Routes */}
-        {routes.map((route, routeIdx) => {
+          {routes.map((route, routeIdx) => {
           const color = VEHICLE_COLORS[routeIdx % VEHICLE_COLORS.length]
-          const polylinePositions = route.geometry
-            ? route.geometry.map((coord) => [coord[1], coord[0]])
-            : route.stops.map((stop) => [stop.location.latitude, stop.location.longitude])
+            const polylinePositions = route.geometry
+              ? route.geometry
+                  .filter((coord) => coord && Array.isArray(coord) && coord.length >= 2)
+                  .map((coord) => [coord[1], coord[0]])
+              : route.stops
+                  .map((stop) => extractLatLonFrom(stop))
+                  .filter(Boolean)
 
           return (
             <div key={`route-${routeIdx}`}>
               {/* Polyline */}
-              <Polyline
-                positions={polylinePositions}
-                color={color}
-                weight={3}
-                opacity={0.8}
-                dashArray={route.geometry_type === 'osrm' ? undefined : '5, 5'}
-              />
+              {polylinePositions && polylinePositions.length > 0 && (
+                <Polyline
+                  positions={polylinePositions}
+                  color={color}
+                  weight={3}
+                  opacity={0.8}
+                  dashArray={route.geometry_type === 'osrm' ? undefined : '5, 5'}
+                />
+              )}
 
               {/* Stop markers */}
-              {route.stops.map((stop, stopIdx) => (
-                <Marker
-                  key={`stop-${routeIdx}-${stopIdx}`}
-                  position={[stop.location.latitude, stop.location.longitude]}
-                  icon={createStopMarker(color)}
-                >
-                  <Popup>
-                    <strong>Stop {stopIdx + 1}</strong>
-                    <br />
-                    ID: {stop.container_id}
-                    <br />
-                    Demand: {stop.demand}kg
-                  </Popup>
-                </Marker>
-              ))}
+              {route.stops.map((stop, stopIdx) => {
+                const pos = extractLatLonFrom(stop)
+                if (!pos) return null
+                return (
+                  <Marker
+                    key={`stop-${routeIdx}-${stopIdx}`}
+                    position={pos}
+                    icon={createStopMarker(color)}
+                  >
+                    <Popup>
+                      <strong>Stop {stopIdx + 1}</strong>
+                      <br />
+                      ID: {stop.container_id}
+                      <br />
+                      Demand: {stop.demand}kg
+                    </Popup>
+                  </Marker>
+                )
+              })}
             </div>
           )
         })}
