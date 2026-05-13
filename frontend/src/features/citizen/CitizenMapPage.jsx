@@ -4,6 +4,7 @@ import { useCitizenNearbyQuery } from '../../hooks/useCitizenNearbyQuery'
 import NearbySearchControls from './components/NearbySearchControls'
 import ContainerList from './components/ContainerList'
 import { createContainerIcon } from '../../utils/map'
+import { getProp } from '../../utils/ngsi'
 import MapErrorBoundary from '../../components/common/MapErrorBoundary'
 import MapLegend from './components/MapLegend'
 import './styles/citizen-map.css'
@@ -43,11 +44,11 @@ export default function CitizenMapPage() {
 
   const normalizeContainer = useCallback((container) => ({
     id: container.id,
-    name: container.name || container.id,
-    waste_type: container.waste_type || container.containerType || inferWasteType(container),
-    fill_level: container.fill_level ?? container.fillLevel ?? null,
-    status: container.status || 'unknown',
-    last_updated: container.last_updated || container.lastSeen || null,
+    name: getProp(container, 'name') || container.id,
+    waste_type: getProp(container, 'waste_type') || getProp(container, 'containerType') || inferWasteType(container),
+    fill_level: getProp(container, 'fillLevel') ?? getProp(container, 'fill_level') ?? null,
+    status: getProp(container, 'status') ?? 'unknown',
+    last_updated: getProp(container, 'lastUpdated') ?? getProp(container, 'last_seen') ?? getProp(container, 'lastSeen') ?? null,
     distance: container.distance,
     location: container.location,
   }), [])
@@ -105,6 +106,11 @@ export default function CitizenMapPage() {
   }
 
   const markers = useMemo(() => containers.map((c) => ({ id: c.id, position: extractLatLon(c), container: c })), [containers])
+  // Temporary debug to confirm API returns containers
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('Citizen nearby data:', data, 'normalized:', containers.length)
+  }, [data, containers.length])
   const userLocation = lat && lon ? [lat, lon] : null
   const mapPoints = useMemo(() => {
     const points = [...markers.map((marker) => marker.position).filter(Boolean)]
@@ -112,20 +118,34 @@ export default function CitizenMapPage() {
     return points
   }, [markers, userLocation])
 
+  function MapInvalidate({ watch }) {
+    const map = useMap()
+    useEffect(() => {
+      // give layout a moment to settle, then invalidate size
+      const t = setTimeout(() => {
+        try { map.invalidateSize() } catch (e) { /* ignore */ }
+      }, 200)
+      return () => clearTimeout(t)
+    }, [map, watch])
+    return null
+  }
+
   return (
     <div className="citizen-map-page">
       <aside className="citizen-map-page__sidebar">
-        <NearbySearchControls
-          onGeolocation={handleGeolocation}
-          onManualLocation={handleManualLocation}
-          radius={radius}
-          onRadiusChange={setRadius}
-          wasteTypes={wasteTypes}
-          onWasteTypesChange={setWasteTypes}
-          isLoading={isLoading}
-          lat={lat}
-          lon={lon}
-        />
+        <div className="citizen-map-page__controls">
+          <NearbySearchControls
+            onGeolocation={handleGeolocation}
+            onManualLocation={handleManualLocation}
+            radius={radius}
+            onRadiusChange={setRadius}
+            wasteTypes={wasteTypes}
+            onWasteTypesChange={setWasteTypes}
+            isLoading={isLoading}
+            lat={lat}
+            lon={lon}
+          />
+        </div>
         <div className="citizen-map-page__results">
           {isLoading && <div className="loading-state">Searching nearby containers...</div>}
           {error && (
@@ -151,6 +171,7 @@ export default function CitizenMapPage() {
         <MapErrorBoundary>
         <MapContainer center={mapCenter} zoom={13} className="map-container">
           <MapAutoFit points={mapPoints} />
+          <MapInvalidate watch={containers.length} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; OpenStreetMap contributors'

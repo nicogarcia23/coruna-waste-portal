@@ -1,5 +1,35 @@
-import { formatFillLevel, formatDistance, formatTimestamp } from '../../../utils/format'
+import { formatFillLevel, formatDistance, formatTimestamp, getStatusLabel } from '../../../utils/format'
 import '../styles/container-list.css'
+
+function getFillLevelCategory(fillLevel) {
+  if (fillLevel === null || fillLevel === undefined || Number.isNaN(fillLevel)) return null
+  const level = Number(fillLevel)
+  if (level < 50) return 'low'
+  if (level < 75) return 'medium'
+  return 'high'
+}
+
+function FillLevelBar({ fillLevel }) {
+  if (fillLevel === null || fillLevel === undefined || Number.isNaN(fillLevel)) {
+    return <div className="container-list__item-body">Sin datos</div>
+  }
+
+  const category = getFillLevelCategory(fillLevel)
+  const percentage = Math.min(Math.max(Number(fillLevel), 0), 100)
+
+  return (
+    <div className="fill-level-container">
+      <span className="label">Llenado:</span>
+      <div className="fill-level-bar">
+        <div
+          className={`fill-level-bar__progress fill-level-bar__progress--${category}`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      <span className="fill-level-text">{formatFillLevel(fillLevel)}</span>
+    </div>
+  )
+}
 
 export default function ContainerList({ containers, selectedId, onSelect }) {
   return (
@@ -21,23 +51,25 @@ export default function ContainerList({ containers, selectedId, onSelect }) {
               </span>
             </div>
             <div className="container-list__item-body">
-              <div>
-                <span className="label">Fill:</span> {formatFillLevel(container.fill_level)}
-              </div>
+              <FillLevelBar fillLevel={container.fill_level} />
+              
               <div>
                 <span className="label">Status:</span>{' '}
                 <span
                   className={`status-badge status-badge--${container.status.toLowerCase().replace(/_/g, '-')}`}
                 >
-                  {container.status}
+                  {getStatusLabel(container.status)}
                 </span>
               </div>
+
               {container.distance !== undefined && (
-                <div>
-                  <span className="label">Distance:</span> {formatDistance(container.distance)}
+                <div className="distance-info">
+                  <span className="label">Distance:</span>{' '}
+                  <span className="distance-value">{formatDistance(container.distance)}</span>
                 </div>
               )}
-              <div>
+
+              <div className="timestamp-info">
                 <span className="label">Last seen:</span> {formatTimestamp(container.last_updated)}
               </div>
             </div>

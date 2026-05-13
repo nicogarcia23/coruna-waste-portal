@@ -37,6 +37,7 @@ async def post_entity(client, url, ent, semaphore):
                 # conflict: update attributes
                 eid = payload['id']
                 attrs = {k:v for k,v in payload.items() if k not in ('id','type','@context')}
+                attrs['@context'] = CORE_CONTEXT
                 pr = await client.patch(url + f'/ngsi-ld/v1/entities/{eid}/attrs', json=attrs, headers={'Content-Type':'application/ld+json'})
                 return pr.status_code in (204,200), pr.text
             return False, r.text

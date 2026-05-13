@@ -7,7 +7,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import numpy as np
 import geopandas as gpd
@@ -60,6 +60,19 @@ def sample_points_in_polygon(poly: Polygon, n, rng):
         jitter = Point(c.x + rng.uniform(-1e-4,1e-4), c.y + rng.uniform(-1e-4,1e-4))
         points.append(jitter)
     return points
+
+
+def infer_container_status(fill_level, rng, cfg):
+    fault_probability = cfg['fill_behavior'].get('fault_probability', 0.0)
+    if rng.uniform() < fault_probability:
+        return 'out_of_service'
+    if fill_level >= 75:
+        return 'needs_collection'
+    return 'ok'
+
+
+def utc_now_iso():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
 def generate(seed_name, random_seed, output_dir):
     cfg = load_config(Path(__file__).parent / 'config.yaml')
@@ -124,6 +137,7 @@ def generate(seed_name, random_seed, output_dir):
             weights = weights / weights.sum()
             chosen = rng.choice(model_candidates, p=weights)
             cid = container_id(slug, t, idx)
+            fill_level = float(rng.uniform(10.0, 90.0))
             # assign isle by nearest centroid
             nearest_idx = 0
             if isle_centroids:
@@ -136,7 +150,7 @@ def generate(seed_name, random_seed, output_dir):
                 'model': chosen['id'],
                 'isle': isle_id(slug, nearest_idx+1),
                 'geometry': p,
-                'fillLevel': float(rng.uniform(0.1,0.9)),
+                'fillLevel': fill_level,
             }
             containers.append(cont)
             # create simple NGSI-LD payload
@@ -148,7 +162,10 @@ def generate(seed_name, random_seed, output_dir):
                     'value': {'type':'Point','coordinates':[p.x, p.y]}
                 },
                 'model': {'type':'Property','value': chosen['id']},
-                'isle': {'type':'Relationship','object': isle_id(slug, nearest_idx+1)}
+                'isle': {'type':'Relationship','object': isle_id(slug, nearest_idx+1)},
+                'fillLevel': {'type':'Property','value': fill_level},
+                'status': {'type':'Property','value': infer_container_status(fill_level, rng, cfg)},
+                'lastSeen': {'type':'Property','value': utc_now_iso()},
             }
             orion_entities.append(ent)
             idx += 1
