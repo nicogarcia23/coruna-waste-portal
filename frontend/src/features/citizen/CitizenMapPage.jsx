@@ -133,17 +133,19 @@ export default function CitizenMapPage() {
   return (
     <div className="citizen-map-page">
       <aside className="citizen-map-page__sidebar">
-        <NearbySearchControls
-          onGeolocation={handleGeolocation}
-          onManualLocation={handleManualLocation}
-          radius={radius}
-          onRadiusChange={setRadius}
-          wasteTypes={wasteTypes}
-          onWasteTypesChange={setWasteTypes}
-          isLoading={isLoading}
-          lat={lat}
-          lon={lon}
-        />
+        <div className="citizen-map-page__controls">
+          <NearbySearchControls
+            onGeolocation={handleGeolocation}
+            onManualLocation={handleManualLocation}
+            radius={radius}
+            onRadiusChange={setRadius}
+            wasteTypes={wasteTypes}
+            onWasteTypesChange={setWasteTypes}
+            isLoading={isLoading}
+            lat={lat}
+            lon={lon}
+          />
+        </div>
         <div className="citizen-map-page__results">
           {isLoading && <div className="loading-state">Searching nearby containers...</div>}
           {error && (

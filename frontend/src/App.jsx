@@ -1,8 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { isAuthenticated } from './services/auth'
+import './styles/app-header.css'
 
 function linkClass({ isActive }) {
   return isActive ? 'nav-link nav-link--active' : 'nav-link'
+}
+
+function operatorLinkClass({ isActive }) {
+  return isActive ? 'nav-link nav-link--operator-login nav-link--active' : 'nav-link nav-link--operator-login'
 }
 
 export default function App() {
@@ -11,7 +16,7 @@ export default function App() {
   return (
     <div>
       <header className="app-header">
-        <div className="app-header__brand">Coruna Waste Portal</div>
+        <div className="app-header__brand">♻️ Portal de Gestión de Residuos — A Coruña</div>
         <nav className="app-header__nav" aria-label="Main navigation">
           <NavLink to="/" className={linkClass}>
             Map
@@ -26,8 +31,8 @@ export default function App() {
               </NavLink>
             </>
           ) : (
-            <NavLink to="/operator/login" className={linkClass}>
-              Operator Login
+            <NavLink to="/operator/login" className={operatorLinkClass}>
+              Acceso Operador
             </NavLink>
           )}
         </nav>

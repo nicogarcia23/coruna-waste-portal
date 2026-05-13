@@ -2,12 +2,15 @@
 .container-list {
   display: flex;
   flex-direction: column;
+  gap: 0;
+  height: 100%;
 }
 
 .container-list__header {
   padding: 8px 0 12px 0;
   border-bottom: 1px solid var(--color-border);
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .container-list__header h4 {
@@ -25,20 +28,29 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .container-list__item {
+  min-height: 80px;
   padding: 12px;
-  background: var(--color-bg);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .container-list__item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .container-list__item--active {
@@ -51,35 +63,37 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
 
 .container-list__item-header strong {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   flex: 1;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--color-text);
 }
 
 .waste-type-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .waste-type-badge--glass {
-  background: var(--waste-glass);
+  background: var(--color-glass);
   color: white;
 }
 
 .waste-type-badge--plastic {
-  background: var(--waste-plastic);
+  background: var(--color-plastic);
   color: white;
 }
 
@@ -89,48 +103,142 @@
 }
 
 .waste-type-badge--organic {
-  background: var(--waste-organic);
+  background: var(--color-organic);
   color: white;
 }
 
 .waste-type-badge--paper {
-  background: var(--waste-paper);
+  background: var(--color-paper);
+  color: white;
+}
+
+.waste-type-badge--general {
+  background: var(--color-general);
   color: white;
 }
 
 .container-list__item-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text);
 }
 
 .container-list__item-body .label {
   font-weight: 600;
   color: var(--color-text);
+  display: inline;
 }
 
+/* Fill Level Progress Bar */
+.fill-level-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fill-level-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fill-level-bar__progress {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.fill-level-bar__progress--low {
+  background: var(--color-fill-low);
+  width: 33%;
+}
+
+.fill-level-bar__progress--medium {
+  background: var(--color-fill-medium);
+  width: 66%;
+}
+
+.fill-level-bar__progress--high {
+  background: var(--color-fill-high);
+  width: 100%;
+}
+
+.fill-level-text {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* Status Badge */
 .status-badge {
   display: inline-block;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .status-badge--ok {
-  background: #d4edda;
-  color: #155724;
+  background: var(--status-ok);
+  color: var(--status-ok-text);
 }
 
 .status-badge--needs-collection {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--status-needs-collection);
+  color: var(--status-needs-collection-text);
+}
+
+.status-badge--needs_collection {
+  background: var(--status-needs-collection);
+  color: var(--status-needs-collection-text);
+}
+
+.status-badge--maintenance {
+  background: var(--status-maintenance);
+  color: var(--status-maintenance-text);
 }
 
 .status-badge--out-of-service {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--status-out-of-service);
+  color: var(--status-out-of-service-text);
 }
+
+.status-badge--out_of_service {
+  background: var(--status-out-of-service);
+  color: var(--status-out-of-service-text);
+}
+
+/* Distance info */
+.distance-info {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.distance-info .label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.distance-value {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Last seen timestamp */
+.timestamp-info {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.timestamp-info .label {
+  font-weight: 600;
+}
+

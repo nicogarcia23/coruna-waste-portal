@@ -93,10 +93,12 @@ For detailed architecture information, see [docs/architecture.md](docs/architect
    cp infra/.env.example infra/.env
    ```
 
-3. **Start the full stack (FIWARE + backend + frontend)**
+3. **Start the full stack (FIWARE + backend + frontend + mock data)**
    ```bash
    make up-all
    ```
+
+   This also generates and loads the mock `WasteContainer` entities into Orion-LD so the map starts with data.
 
 4. **Check services**
    ```bash

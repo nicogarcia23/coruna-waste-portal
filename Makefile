@@ -1,12 +1,17 @@
 COMPOSE = docker compose --env-file infra/.env -f infra/docker-compose.yml
+PYTHON ?= $(shell if [ -x "$(CURDIR)/.venv/bin/python" ]; then echo "$(CURDIR)/.venv/bin/python"; elif command -v python3 >/dev/null 2>&1; then command -v python3; else command -v python; fi)
 
-.PHONY: up up-all all down logs ps reset backend-local frontend-local
+.PHONY: up up-all all down logs ps reset backend-local frontend-local seed-mock-data
 
 up:
 	$(COMPOSE) up -d
 
 up-all:
-	$(COMPOSE) --profile app up -d
+	$(COMPOSE) up -d --wait mqtt-broker mongodb orion-ld timescaledb quantumleap redis vroom backend-api frontend grafana
+	$(COMPOSE) up -d orion-subscriber
+	$(MAKE) seed-mock-data
+
+seed-mock-data: mock-generate mock-ingest-current
 
 all: up-all
 
@@ -35,7 +40,6 @@ frontend-local:
 
 .PHONY: mock-generate mock-ingest-current mock-ingest-historical mock-validate
 
-PYTHON ?= python
 SEED ?= dev
 
 mock-generate:

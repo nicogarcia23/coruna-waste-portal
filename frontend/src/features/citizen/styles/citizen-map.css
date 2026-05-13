@@ -9,10 +9,26 @@
 .citizen-map-page__sidebar {
   display: flex;
   flex-direction: column;
+  height: 100%;
   background: var(--color-bg-alt);
   border-right: 1px solid var(--color-border);
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.citizen-map-page__controls {
+  flex-shrink: 0;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+  overflow-y: auto;
+  max-height: 50%;
+}
+
+.citizen-map-page__results {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 0 16px 16px;
 }
 
 .citizen-map-page__map {
@@ -25,22 +41,27 @@
   height: 100%;
 }
 
-.citizen-map-page__results {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .citizen-map-page {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
+    height: calc(100vh - 60px);
   }
 
   .citizen-map-page__sidebar {
     max-height: 40vh;
     border-right: none;
     border-bottom: 1px solid var(--color-border);
+    overflow-y: auto;
+  }
+
+  .citizen-map-page__controls {
+    max-height: none;
+    border-bottom: none;
+  }
+
+  .citizen-map-page__results {
+    padding: 12px;
   }
 }

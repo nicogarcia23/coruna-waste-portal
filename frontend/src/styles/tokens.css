@@ -11,12 +11,26 @@
   --color-fill-overflow: #9c27b0;
 
   --color-primary: #0b5ed7;
+  --color-primary-light: #e7f1fd;
   --color-surface: #ffffff;
   --color-background: #f3f6fb;
+  --color-bg-alt: #f8f9fb;
   --color-text: #142033;
+  --color-text-secondary: #5b6b82;
+  --color-text-tertiary: #8a99b0;
   --color-muted: #5b6b82;
   --color-border: #d9e1ef;
   --color-danger: #c62828;
+  
+  /* Status badge colors */
+  --status-ok: #d4edda;
+  --status-ok-text: #155724;
+  --status-needs-collection: #fff3cd;
+  --status-needs-collection-text: #856404;
+  --status-maintenance: #fff3cd;
+  --status-maintenance-text: #856404;
+  --status-out-of-service: #f8d7da;
+  --status-out-of-service-text: #721c24;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
