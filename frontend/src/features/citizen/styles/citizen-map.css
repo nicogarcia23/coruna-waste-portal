@@ -17,6 +17,7 @@
 
 .citizen-map-page__map {
   position: relative;
+  height: 100%;
 }
 
 .map-container {
