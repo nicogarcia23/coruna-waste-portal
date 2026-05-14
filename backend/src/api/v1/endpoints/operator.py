@@ -5,11 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.services.analytics_service import AnalyticsService
 from src.services.history_service import HistoryService
 from src.services.route_service import RouteService
+from src.clients.osrm import OSRMClient
 from src.clients.orion import OrionLDClient
 from src.clients.vroom import VroomClient
 from src.repositories.aggregate_repository import AggregateRepository
 from src.repositories.observation_repository import ObservationRepository
-from src.core.dependencies import get_orion_client, get_db_session, get_vroom_client
+from src.core.dependencies import get_orion_client, get_db_session, get_vroom_client, get_osrm_client
 from src.core.security import require_operator
 from src.schemas.operator import (
     ContainerOverviewResponse, AggregateResultResponse, 
@@ -132,13 +133,15 @@ def create_operator_router() -> APIRouter:
         request: RouteOptimizeRequest,
         orion_client: OrionLDClient = Depends(get_orion_client),
         vroom_client: VroomClient = Depends(get_vroom_client),
+        osrm_client: OSRMClient = Depends(get_osrm_client),
         current_user = Depends(require_operator)
     ):
         """Optimize collection routes for given containers and vehicles."""
         try:
             route_service = RouteService(
                 orion_client=orion_client,
-                vroom_client=vroom_client
+                vroom_client=vroom_client,
+                osrm_client=osrm_client,
             )
             response = await route_service.optimize_routes(request)
             return response

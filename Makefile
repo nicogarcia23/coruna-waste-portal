@@ -53,3 +53,8 @@ mock-ingest-historical:
 
 mock-validate:
 	cd data/mock && $(PYTHON) -m pytest tests/test_mock_generator.py -q
+
+.PHONY: db-init-policies
+
+db-init-policies:
+	cd infra/db && bash init.sh

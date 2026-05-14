@@ -1,0 +1,87 @@
+{
+  "uid": "fleet-route-summary",
+  "title": "Fleet & Route Summary",
+  "tags": ["waste-portal"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Distance/load waveform smoke test",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, 'distance_km' AS metric, (100 + 20 * SIN(EXTRACT(EPOCH FROM ts) / 86400.0))::double precision AS value FROM generate_series(now() - interval '29 days', now(), interval '1 day') AS ts UNION ALL SELECT ts AS time, 'load_liters' AS metric, (500 + 80 * COS(EXTRACT(EPOCH FROM ts) / 86400.0))::double precision AS value FROM generate_series(now() - interval '29 days', now(), interval '1 day') AS ts ORDER BY 1, 2",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Database version snapshot",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT * FROM (VALUES ('server_version', version()), ('database', current_database()), ('user', current_user)) AS t(metric, value)",
+          "editorMode": "code"
+        }
+      ]
+    }
+  ]
+}

@@ -82,6 +82,16 @@ components:
           items: { $ref: '#/components/schemas/RouteStop' }
         total_distance_m: { type: number }
         total_load_liters: { type: number }
+        geometry:
+          type: array
+          items:
+            type: array
+            items: { type: number }
+            minItems: 2
+            maxItems: 2
+        geometry_type:
+          type: string
+          enum: [osrm, straight_line]
     UnassignedContainer:
       type: object
       properties:

@@ -1,16 +1,25 @@
 import math
-from typing import List, Optional, Dict, Any
+import logging
+from typing import List, Optional, Dict, Any, Tuple
+
+from src.clients.osrm import OSRMClient
 from src.clients.orion import OrionLDClient
 from src.clients.vroom import VroomClient
-from src.core.exceptions import VroomError
+from src.core.exceptions import VroomError, OSRMError
+import asyncio
+from src.repositories.route_repository import RouteRepository
+
+
+logger = logging.getLogger(__name__)
 
 
 class RouteService:
     """Service for route optimization."""
 
-    def __init__(self, orion_client: OrionLDClient, vroom_client: VroomClient):
+    def __init__(self, orion_client: OrionLDClient, vroom_client: VroomClient, osrm_client: OSRMClient):
         self.orion_client = orion_client
         self.vroom_client = vroom_client
+        self.osrm_client = osrm_client
 
     async def optimize_routes(self, request: "RouteOptimizeRequest") -> "RouteOptimizeResponse":
         """
@@ -48,7 +57,7 @@ class RouteService:
             raise e
         
         # Step 6: Map response
-        return self._map_vroom_response(vroom_response, filtered, request)
+        return await self._map_vroom_response(vroom_response, filtered, request)
 
     async def _resolve_containers(self, request: "RouteOptimizeRequest") -> List[dict]:
         """Resolve candidate containers from request filters."""
@@ -122,7 +131,7 @@ class RouteService:
         
         return vehicles
 
-    def _map_vroom_response(
+    async def _map_vroom_response(
         self,
         vroom_response: dict,
         containers: List[dict],
@@ -134,8 +143,9 @@ class RouteService:
             RouteSummaryTotal
         )
         
-        # Build routes
-        routes = []
+        # Build routes and collect waypoint sets for geometry resolution
+        route_payloads: List[Dict[str, Any]] = []
+        route_waypoints: List[List[Tuple[float, float]]] = []
         total_distance = 0
         total_load = 0
         
@@ -160,11 +170,59 @@ class RouteService:
                             "distance_m": distance
                         })
             
+            waypoints: List[Tuple[float, float]] = [(request.depot_lat, request.depot_lon)]
+            for step in steps:
+                if step.get("type") != "job":
+                    continue
+                job_id = step.get("job")
+                if job_id is None or job_id >= len(containers):
+                    continue
+                location = containers[job_id].get("location", {})
+                coords = location.get("coordinates", [])
+                if isinstance(coords, list) and len(coords) >= 2:
+                    waypoints.append((float(coords[1]), float(coords[0])))
+
+            waypoints.append((request.depot_lat, request.depot_lon))
+            route_waypoints.append(waypoints)
+
+            route_payloads.append(
+                {
+                    "vehicle_id": vehicle_id,
+                    "stops": stops,
+                    "total_distance_m": distance,
+                    "total_load_liters": load,
+                }
+            )
+
+        geometries: List[List[List[float]]] = []
+        osrm_failed = False
+        if route_waypoints:
+            try:
+                geometries = await self.osrm_client.get_routes_geometry(route_waypoints)
+            except OSRMError as exc:
+                logger.warning("OSRM unavailable; falling back to straight-line geometry: %s", exc)
+                osrm_failed = True
+
+        routes = []
+        for idx, route_payload in enumerate(route_payloads):
+            if osrm_failed:
+                geometry = self._build_straight_line_geometry(route_waypoints[idx])
+                geometry_type = "straight_line"
+            else:
+                geometry = geometries[idx] if idx < len(geometries) else []
+                if geometry:
+                    geometry_type = "osrm"
+                else:
+                    geometry = self._build_straight_line_geometry(route_waypoints[idx])
+                    geometry_type = "straight_line"
+
             route_summary = RouteSummary(
-                vehicle_id=vehicle_id,
-                stops=stops,
-                total_distance_m=distance,
-                total_load_liters=load
+                vehicle_id=route_payload["vehicle_id"],
+                stops=route_payload["stops"],
+                total_distance_m=route_payload["total_distance_m"],
+                total_load_liters=route_payload["total_load_liters"],
+                geometry=geometry,
+                geometry_type=geometry_type,
             )
             routes.append(route_summary)
         
@@ -179,7 +237,7 @@ class RouteService:
                     )
                 )
         
-        return RouteOptimizeResponse(
+        response = RouteOptimizeResponse(
             routes=routes,
             unassigned=unassigned,
             summary=RouteSummaryTotal(
@@ -189,3 +247,54 @@ class RouteService:
             ),
             debug=vroom_response if request.debug else None
         )
+
+        # Persist a lightweight route summary asynchronously (fire-and-forget)
+        try:
+            summary_row = {
+                "run_at": None,
+                "waste_type": getattr(request, "waste_type", None),
+                "isle_id": getattr(request, "isle_id", None),
+                "vehicle_count": request.vehicle_count,
+                "containers_collected": sum(len(r.stops) for r in routes),
+                "unassigned_count": len(unassigned),
+                "total_distance_m": total_distance,
+                "total_load_liters": total_load,
+                "geometry_type": routes[0].geometry_type if routes else None,
+                "raw_response": vroom_response,
+            }
+
+            async def _persist_summary(app_session):
+                try:
+                    repo = RouteRepository(app_session)
+                    await repo.insert_route_summary(summary_row)
+                except Exception:
+                    logger.exception("Failed to persist route summary")
+
+            # Try to obtain an AsyncSession from the RouteService if attached
+            app_session = getattr(self, "db_session", None)
+            if app_session is not None:
+                try:
+                    asyncio.create_task(_persist_summary(app_session))
+                except Exception:
+                    logger.debug("Failed to schedule async persistence task for route summary")
+        except Exception:
+            logger.debug("Route summary persistence setup failed; continuing without persistence")
+
+        return response
+
+
+    def _build_straight_line_geometry(
+        self,
+        waypoints: List[Tuple[float, float]],
+    ) -> List[List[float]]:
+        """Build straight-line geometry ([lon, lat]) from ordered waypoints."""
+        geometry: List[List[float]] = []
+        for lat, lon in waypoints:
+            point = [float(lon), float(lat)]
+            if not geometry or geometry[-1] != point:
+                geometry.append(point)
+
+        if len(geometry) == 1:
+            geometry.append(geometry[0])
+
+        return geometry

@@ -1,0 +1,125 @@
+{
+  "uid": "system-health",
+  "title": "System Health",
+  "tags": ["waste-portal"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Backend/DB pulse",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, (1 + 0.5 * SIN(EXTRACT(EPOCH FROM ts) / 1800.0))::double precision AS value FROM generate_series(now() - interval '23 hours', now(), interval '1 hour') AS ts ORDER BY 1",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Database heartbeat",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, (1 + 0.25 * COS(EXTRACT(EPOCH FROM ts) / 1800.0))::double precision AS value FROM generate_series(now() - interval '23 hours', now(), interval '1 hour') AS ts ORDER BY 1",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Health snapshot",
+      "datasource": "TimescaleDB",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT * FROM (VALUES ('grafana', 'up'), ('database', 'reachable'), ('backend', 'reachable via localhost:8000'), ('checked_at', to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))) AS t(metric, value)",
+          "editorMode": "code"
+        }
+      ]
+    }
+  ]
+}
