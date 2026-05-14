@@ -49,7 +49,7 @@ mock-ingest-current:
 	cd data/mock && $(PYTHON) ingest_orion.py --seed $(SEED)
 
 mock-ingest-historical:
-	cd data/mock && $(PYTHON) ingest_historical.py --seed $(SEED)
+	$(PYTHON) -m data.mock.ingest_historical --seed $(SEED)
 
 mock-validate:
 	cd data/mock && $(PYTHON) -m pytest tests/test_mock_generator.py -q

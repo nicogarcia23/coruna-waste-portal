@@ -1,4 +1,5 @@
 {
+  "@context": ["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"],
   "description": "WasteObserved -> QuantumLeap time-series ingestion",
   "type": "Subscription",
   "entities": [ { "type": "WasteObserved" } ],

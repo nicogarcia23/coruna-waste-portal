@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Coruna Waste Dashboards
+    orgId: 1
+    folder: Coruna Waste
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

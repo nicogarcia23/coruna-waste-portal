@@ -218,10 +218,15 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_SERVER_HTTP_PORT: 3000
+      POSTGRES_USER: ${POSTGRES_USER:-waste}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-waste-dev-password}
+      POSTGRES_DB: ${POSTGRES_DB:-waste}
     ports:
       - "3001:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - waste-net
 
